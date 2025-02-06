@@ -3,8 +3,8 @@ package dmu.dasom.api.domain.common.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
+@Getter
 public enum ErrorCode {
 
     UNAUTHORIZED(401, "C001", "인증되지 않은 사용자입니다."),

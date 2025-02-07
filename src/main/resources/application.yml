@@ -3,12 +3,3 @@ server:
 spring:
   application:
     name: dasom-api
-  datasource:
-    url: ${DB_URL}
-    driver-class-name: oracle.jdbc.OracleDriver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true

@@ -13,4 +13,6 @@ WORKDIR /app
 
 COPY --from=build /home/gradle/project/build/libs/dmu-dasom-api.jar api.jar
 
+EXPOSE 8080
+
 ENTRYPOINT ["java", "-Dspring.profiles.active=default,credentials", "-jar", "api.jar"]

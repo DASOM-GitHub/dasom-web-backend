@@ -14,6 +14,7 @@ public enum ErrorCode {
     LOGIN_FAILED(400, "C005", "로그인에 실패하였습니다."),
     SIGNUP_FAILED(400, "C006", "회원가입에 실패하였습니다."),
     ARGUMENT_NOT_VALID(400, "C007", "요청한 값이 올바르지 않습니다."),
+    TOKEN_NOT_VALID(400, "C008", "토큰이 올바르지 않습니다."),
     ;
 
     private final int status;

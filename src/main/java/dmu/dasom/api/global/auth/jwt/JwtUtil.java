@@ -95,19 +95,19 @@ public class JwtUtil {
         final String refreshTokenKey = REFRESH_TOKEN_PREFIX.concat(email);
 
         if (redisTemplate.hasKey(accessTokenKey)) {
-            blacklistToken(redisTemplate.opsForValue().get(accessTokenKey));
+            blacklistToken(redisTemplate.opsForValue().get(accessTokenKey), email);
             redisTemplate.delete(accessTokenKey);
         }
 
         if (redisTemplate.hasKey(refreshTokenKey)) {
-            blacklistToken(redisTemplate.opsForValue().get(refreshTokenKey));
+            blacklistToken(redisTemplate.opsForValue().get(refreshTokenKey), email);
             redisTemplate.delete(refreshTokenKey);
         }
     }
 
     // 토큰 블랙리스트 추가
-    public void blacklistToken(final String token) {
-        redisTemplate.opsForValue().set(BLACKLIST_PREFIX.concat(token), token, getRemainingTokenExpiration(token));
+    public void blacklistToken(final String token, final String email) {
+        redisTemplate.opsForValue().set(BLACKLIST_PREFIX.concat(token), email, getRemainingTokenExpiration(token), TimeUnit.MILLISECONDS);
     }
 
     // 토큰 블랙리스트 확인

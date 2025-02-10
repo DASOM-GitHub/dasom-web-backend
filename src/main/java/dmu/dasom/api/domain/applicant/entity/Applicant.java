@@ -69,4 +69,8 @@ public class Applicant {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    public void updateStatus(final ApplicantStatus status) {
+        this.status = status;
+    }
+
 }

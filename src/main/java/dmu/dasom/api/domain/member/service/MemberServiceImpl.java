@@ -5,6 +5,9 @@ import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.member.dto.SignupRequestDto;
 import dmu.dasom.api.domain.member.entity.Member;
 import dmu.dasom.api.domain.member.repository.MemberRepository;
+import dmu.dasom.api.global.auth.dto.TokenBox;
+import dmu.dasom.api.global.auth.jwt.JwtUtil;
+import dmu.dasom.api.global.auth.userdetails.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final BCryptPasswordEncoder encoder;
     private final MemberRepository memberRepository;
+    private final JwtUtil jwtUtil;
 
     // 이메일로 사용자 조회
     @Override
@@ -40,6 +44,12 @@ public class MemberServiceImpl implements MemberService {
 
         // 비밀번호 암호화 후 저장
         memberRepository.save(request.toEntity(encoder.encode(request.getPassword())));
+    }
+
+    // 토큰 갱신
+    @Override
+    public TokenBox tokenRotation(final UserDetailsImpl userDetails) {
+        return jwtUtil.tokenRotation(userDetails);
     }
 
 }

@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.applicant.entity;
 
+import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -71,6 +72,20 @@ public class Applicant {
 
     public void updateStatus(final ApplicantStatus status) {
         this.status = status;
+    }
+
+    public ApplicantResponseDto toApplicantResponse() {
+        return ApplicantResponseDto.builder()
+                .id(this.id)
+                .studentNo(this.studentNo)
+                .contact(this.contact)
+                .email(this.email)
+                .grade(this.grade)
+                .reasonForApply(this.reasonForApply)
+                .activityWish(this.activityWish)
+                .status(this.status)
+                .createdAt(this.createdAt)
+                .build();
     }
 
 }

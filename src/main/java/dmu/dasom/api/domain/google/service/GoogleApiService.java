@@ -7,6 +7,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import dmu.dasom.api.domain.common.exception.CustomException;
@@ -18,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -30,16 +33,18 @@ public class GoogleApiService {
     private static final Logger logger = LoggerFactory.getLogger(GoogleApiService.class);
     private static final String APPLICATION_NAME = "Recruit Form";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    @Value("${google.credentials.path}")
-    private String credentialsFilePath;
+    @Value("${google.credentials.json}")
+    private String credentialsJson;
     private Sheets sheetsService;
 
-    // 해당 메소드는 sheets의 인스턴스를 얻는데 사용
+    // Google Sheets API 서비스 객체를 생성하는 메소드
     private Sheets getSheetsService() throws IOException, GeneralSecurityException{
         if(sheetsService == null){
+            ByteArrayInputStream credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8));
             GoogleCredentials credentials = GoogleCredentials
-                    .fromStream(new ClassPathResource(credentialsFilePath).getInputStream())
+                    .fromStream(credentialsStream)
                     .createScoped(Collections.singletonList("https://www.googleapis.com/auth/spreadsheets"));
+
             sheetsService = new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, new HttpCredentialsAdapter(credentials))
                     .setApplicationName(APPLICATION_NAME)
                     .build();

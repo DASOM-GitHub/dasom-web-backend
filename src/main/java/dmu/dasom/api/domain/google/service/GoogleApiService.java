@@ -11,6 +11,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,13 +23,14 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class GoogleApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(GoogleApiService.class);
     private static final String APPLICATION_NAME = "Recruit Form";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    @Value("${google.credentials.file.path}")
+    @Value("${google.credentials.path}")
     private String credentialsFilePath;
     private Sheets sheetsService;
 

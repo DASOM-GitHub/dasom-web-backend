@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.applicant.entity;
 
+import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import jakarta.persistence.*;
@@ -26,6 +27,10 @@ public class Applicant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
+
+    @Column(name = "name", nullable = false, length = 16)
+    @Size(max = 16)
+    private String name;
 
     @Column(name = "student_no", nullable = false, length = 8)
     @Pattern(regexp = "^[0-9]{8}$")
@@ -77,14 +82,26 @@ public class Applicant {
     public ApplicantResponseDto toApplicantResponse() {
         return ApplicantResponseDto.builder()
                 .id(this.id)
+                .name(this.name)
+                .studentNo(this.studentNo)
+                .status(this.status)
+                .build();
+    }
+
+    public ApplicantDetailsResponseDto toApplicantDetailsResponse() {
+        return ApplicantDetailsResponseDto.builder()
+                .id(this.id)
+                .name(this.name)
                 .studentNo(this.studentNo)
                 .contact(this.contact)
                 .email(this.email)
                 .grade(this.grade)
                 .reasonForApply(this.reasonForApply)
                 .activityWish(this.activityWish)
+                .isPrivacyPolicyAgreed(this.isPrivacyPolicyAgreed)
                 .status(this.status)
                 .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
                 .build();
     }
 

@@ -3,6 +3,7 @@ package dmu.dasom.api.domain.applicant.service;
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
+import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
@@ -42,8 +43,21 @@ public class ApplicantServiceImpl implements ApplicantService {
     // 지원자 상세 조회
     @Override
     public ApplicantDetailsResponseDto getApplicant(final Long id) {
+        return findById(id).toApplicantDetailsResponse();
+    }
+
+    // 지원자 상태 변경
+    @Override
+    public ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request) {
+        final Applicant applicant = findById(id);
+        applicant.updateStatus(request.getStatus());
+
+        return applicant.toApplicantDetailsResponse();
+    }
+
+    // Repository에서 ID로 지원자 조회
+    private Applicant findById(final Long id) {
         return applicantRepository.findById(id)
-                .map(Applicant::toApplicantDetailsResponse)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_RESULT));
     }
 

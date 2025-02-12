@@ -2,6 +2,7 @@ package dmu.dasom.api.global.admin.controller;
 
 import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
+import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +69,14 @@ public class AdminController {
     @GetMapping("/applicants/{id}")
     public ResponseEntity<ApplicantDetailsResponseDto> getApplicant(@PathVariable("id") @Min(0) final Long id) {
         return ResponseEntity.ok(applicantService.getApplicant(id));
+    }
+
+    // 지원자 상태 변경
+    @Operation(summary = "지원자 상태 변경")
+    @PatchMapping("/applicants/{id}/status")
+    public ResponseEntity<ApplicantDetailsResponseDto> updateApplicantStatus(@PathVariable("id") @Min(0) final Long id,
+                                                                             @Valid @RequestBody final ApplicantStatusUpdateRequestDto request) {
+        return ResponseEntity.ok(applicantService.updateApplicantStatus(id, request));
     }
 
 }

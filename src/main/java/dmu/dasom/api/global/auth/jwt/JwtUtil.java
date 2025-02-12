@@ -3,6 +3,7 @@ package dmu.dasom.api.global.auth.jwt;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.global.auth.dto.TokenBox;
+import dmu.dasom.api.global.auth.userdetails.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,6 +129,12 @@ public class JwtUtil {
         } catch (ExpiredJwtException ex) {
             return true;
         }
+    }
+
+    // Access, Refresh 토큰 갱신
+    public TokenBox tokenRotation(final UserDetailsImpl userDetails) {
+        blacklistTokens(userDetails.getUsername());
+        return generateTokenBox(userDetails.getUsername());
     }
 
 }

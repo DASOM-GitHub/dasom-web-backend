@@ -1,17 +1,19 @@
 package dmu.dasom.api.domain.google.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Value;
+
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -54,9 +56,10 @@ public class GoogleApiService {
             logger.info("Updated rows: {}", result.getUpdatedRows());
         }  catch (IOException e) {
             logger.error("Failed to write data to the spreadsheet", e);
-            throw new RuntimeException("Failed to write data to the spreadsheet: " + e.getMessage(), e);
+            throw new CustomException(ErrorCode.WRITE_FAIL);
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
+            logger.error("Failed to write data to the spreadsheet", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

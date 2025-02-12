@@ -2,7 +2,7 @@ package dmu.dasom.api.domain.google.controller;
 
 import dmu.dasom.api.domain.google.service.GoogleApiService;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +18,9 @@ import java.util.List;
 public class GoogleController {
 
     private final GoogleApiService googleApiService;
+    @Value("${google.spreadsheet.id}")
+    private String spreadsheetId;
 
-    private static final String SPREADSHEET_ID = "1Vpu6_2raNvJN_GGg7aGBmzV4cXG1rCoizHl9v7kbG2o";
     private static final String RANGE = "A1";
 
     @PostMapping("/write")
@@ -27,7 +28,7 @@ public class GoogleController {
         try{
             List<List<Object>> values = List.of(Collections.singletonList(word));
 
-            googleApiService.writeToSheet(SPREADSHEET_ID, RANGE, values);
+            googleApiService.writeToSheet(spreadsheetId, RANGE, values);
             return ResponseEntity.ok("Data written successfully to the spreadsheet" + word);
         } catch (Exception e){
             e.printStackTrace();

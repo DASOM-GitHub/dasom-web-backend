@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,6 +38,8 @@ class ApplicantServiceTest {
     void apply_success() {
         // given
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.empty());
 
         // when
         applicantService.apply(request);
@@ -48,6 +51,38 @@ class ApplicantServiceTest {
     @Test
     @DisplayName("지원자 저장 - 실패")
     void apply_fail() {
+        // given
+        ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(mock(Applicant.class)));
+        when(request.getIsOverwriteConfirmed()).thenReturn(false);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            applicantService.apply(request);
+        });
+
+        // then
+        verify(applicantRepository).findByStudentNo("20210000");
+        assertEquals(ErrorCode.DUPLICATED_STUDENT_NO, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("지원자 저장 - 덮어쓰기")
+    void apply_overwrite() {
+        // given
+        ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
+        when(request.getStudentNo()).thenReturn("20210000");
+        Applicant applicant = mock(Applicant.class);
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(applicant));
+        when(request.getIsOverwriteConfirmed()).thenReturn(true);
+
+        // when
+        applicantService.apply(request);
+
+        // then
+        verify(applicantRepository).findByStudentNo("20210000");
+        verify(applicant).overwrite(request);
     }
 
     @Test

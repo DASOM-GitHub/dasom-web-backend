@@ -8,11 +8,15 @@ import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -21,11 +25,33 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final static int DEFAULT_PAGE_SIZE = 20;
 
     private final ApplicantRepository applicantRepository;
+    private final GoogleApiService googleApiService;
+
+    @Value("${google.spreadsheet.id}")
+    private String spreadsheetId;
 
     // 지원자 저장
     @Override
     public void apply(final ApplicantCreateRequestDto request) {
-        applicantRepository.save(request.toEntity());
+        Applicant applicant = applicantRepository.save(request.toEntity());
+
+        // 스프레드 시트에 기록할 데이터
+        List<List<Object>> values = List.of(List.of(
+                applicant.getId(),
+                applicant.getStudentNo(),
+                applicant.getContact(),
+                applicant.getEmail(),
+                applicant.getGrade(),
+                applicant.getReasonForApply(),
+                applicant.getActivityWish(),
+                applicant.getIsPrivacyPolicyAgreed(),
+                applicant.getCreatedAt(),
+                applicant.getUpdatedAt()
+        ));
+
+        String range = "Sheet1!A:J";
+
+        googleApiService.writeToSheet(spreadsheetId, range, values);
     }
 
     // 지원자 조회

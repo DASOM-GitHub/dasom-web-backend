@@ -5,6 +5,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
 import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.auth.Credentials;
@@ -56,17 +57,18 @@ public class GoogleApiService {
         try {
             Sheets service = getSheetsService();
             ValueRange body = new ValueRange().setValues(values);
-            UpdateValuesResponse result = service.spreadsheets().values()
-                    .update(spreadsheetId, range, body)
+            AppendValuesResponse response = service.spreadsheets().values()
+                    .append(spreadsheetId, range, body)
                     .setValueInputOption("USER_ENTERED")
+                    .setInsertDataOption("INSERT_ROWS")
                     .execute();
-            logger.info("Updated rows: {}", result.getUpdatedRows());
-        }  catch (IOException e) {
-            logger.error("Failed to write data to the spreadsheet", e);
-            throw new CustomException(ErrorCode.WRITE_FAIL);
+            logger.info("Appended rows: {}", response.getUpdates().getUpdatedRows());
         } catch (GeneralSecurityException e) {
-            logger.error("Failed to write data to the spreadsheet", e);
+            logger.error("Failed to write data to the spreadsheet due to security issues", e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (IOException e) {
+            logger.error("Failed to write data to the spreadsheet due to IO issues", e);
+            throw new CustomException(ErrorCode.WRITE_FAIL);
         }
     }
 

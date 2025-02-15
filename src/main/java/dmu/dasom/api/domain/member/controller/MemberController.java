@@ -64,6 +64,7 @@ public class MemberController {
         final HttpHeaders headers = new HttpHeaders();
         headers.add("Access-Token", tokenBox.getAccessToken());
         headers.add("Refresh-Token", tokenBox.getRefreshToken());
+        headers.add("Authority", tokenBox.getAuthority());
 
         return ResponseEntity.ok().headers(headers).build();
     }

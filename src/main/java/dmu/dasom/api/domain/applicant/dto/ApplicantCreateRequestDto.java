@@ -61,6 +61,7 @@ public class ApplicantCreateRequestDto {
 
     public Applicant toEntity() {
         return Applicant.builder()
+                .name(this.name)
                 .studentNo(this.studentNo)
                 .contact(this.contact)
                 .email(this.email)

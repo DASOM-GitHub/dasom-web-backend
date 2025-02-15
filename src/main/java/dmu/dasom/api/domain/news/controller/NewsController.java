@@ -11,11 +11,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 import java.util.List;
 
 @Tag(name = "NEWS API", description = "다솜소식 API")
 @RestController
-@RequestMapping("/news")
+@RequestMapping("/api/news")
 public class NewsController {
 
     private final NewsService newsService;
@@ -42,7 +44,7 @@ public class NewsController {
     })
 
     @PostMapping
-    public ResponseEntity<NewsResponseDto> createNews(@RequestBody NewsRequestDto requestDto) {
+    public ResponseEntity<NewsResponseDto> createNews(@Valid @RequestBody NewsRequestDto requestDto) {
         NewsResponseDto responseDto = newsService.createNews(requestDto);
         return ResponseEntity.status(201).body(responseDto);
     }

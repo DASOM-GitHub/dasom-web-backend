@@ -5,7 +5,6 @@ import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
 import dmu.dasom.api.domain.news.repository.NewsRepository;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,21 +17,22 @@ public class NewsService {
         this.newsRepository = newsRepository;
     }
 
+    // 🔹 전체 조회
     public List<NewsResponseDto> getAllNews() {
         return newsRepository.findAll().stream()
-                .map(news -> new NewsResponseDto(news.getId(), news.getTitle(), news.getContent(), news.getCreatedAt(), news.getImageUrl()))
+                .map(NewsEntity::toResponseDto)
                 .collect(Collectors.toList());
     }
 
+    // 🔹 생성
     public NewsResponseDto createNews(NewsRequestDto requestDto) {
-        NewsEntity news = new NewsEntity();
-        news.setTitle(requestDto.getTitle());
-        news.setContent(requestDto.getContent());
-        news.setImageUrl(requestDto.getImageUrl());
-        news.setCreatedAt(LocalDateTime.now());
+        NewsEntity news = NewsEntity.builder()
+                .title(requestDto.getTitle())
+                .content(requestDto.getContent())
+                .imageUrl(requestDto.getImageUrl())
+                .build();
 
         NewsEntity savedNews = newsRepository.save(news);
-        return new NewsResponseDto(savedNews.getId(), savedNews.getTitle(), savedNews.getContent(), savedNews.getCreatedAt(), savedNews.getImageUrl());
+        return savedNews.toResponseDto();
     }
-
 }

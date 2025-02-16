@@ -46,28 +46,52 @@ public class ApplicantServiceImpl implements ApplicantService {
                 throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
 
             // 기존 지원자 정보 갱신 수행
+            Applicant existingApplicant = applicant.get();
             applicant.get().overwrite(request);
+
+            // 구글 시트 업데이트를 위한 데이터 구성
+            List<List<Object>> values = List.of(List.of(
+                    existingApplicant.getId(),
+                    existingApplicant.getName(),
+                    existingApplicant.getStudentNo(),
+                    existingApplicant.getContact(),
+                    existingApplicant.getEmail(),
+                    existingApplicant.getGrade(),
+                    existingApplicant.getReasonForApply(),
+                    existingApplicant.getActivityWish(),
+                    existingApplicant.getIsPrivacyPolicyAgreed(),
+                    existingApplicant.getCreatedAt(),
+                    existingApplicant.getUpdatedAt()
+            ));
+
+            // 구글 시트에서 해당 지원자의 행 번호 조회(A열에 저장된 지원자 id 기준)
+            int rowNumber = googleApiService.findRowByApplicantId(spreadsheetId, "Sheet1", existingApplicant.getId());
+
+            // 찾아낸 행 번호에 따라 범위를 지정
+            String range = "Sheet1!A" + rowNumber + ":K" + rowNumber;
+            googleApiService.updateSheet(spreadsheetId, range, values);
             return;
         }
 
         // 새로운 지원자일 경우 저장
-        Applicant applicant = applicantRepository.save(request.toEntity());
+        Applicant newApplicant = applicantRepository.save(request.toEntity());
 
         // 스프레드 시트에 기록할 데이터
         List<List<Object>> values = List.of(List.of(
-                applicant.getId(),
-                applicant.getStudentNo(),
-                applicant.getContact(),
-                applicant.getEmail(),
-                applicant.getGrade(),
-                applicant.getReasonForApply(),
-                applicant.getActivityWish(),
-                applicant.getIsPrivacyPolicyAgreed(),
-                applicant.getCreatedAt(),
-                applicant.getUpdatedAt()
+                newApplicant.getId(),
+                newApplicant.getName(),
+                newApplicant.getStudentNo(),
+                newApplicant.getContact(),
+                newApplicant.getEmail(),
+                newApplicant.getGrade(),
+                newApplicant.getReasonForApply(),
+                newApplicant.getActivityWish(),
+                newApplicant.getIsPrivacyPolicyAgreed(),
+                newApplicant.getCreatedAt(),
+                newApplicant.getUpdatedAt()
         ));
 
-        String range = "Sheet1!A:J";
+        String range = "Sheet1!A:K";
 
         googleApiService.writeToSheet(spreadsheetId, range, values);
     }

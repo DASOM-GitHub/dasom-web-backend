@@ -17,14 +17,21 @@ public class NewsService {
         this.newsRepository = newsRepository;
     }
 
-    // 🔹 전체 조회
+    // 전체 조회
     public List<NewsResponseDto> getAllNews() {
         return newsRepository.findAll().stream()
                 .map(NewsEntity::toResponseDto)
                 .collect(Collectors.toList());
     }
 
-    // 🔹 생성
+    // 개별 조회
+    public NewsResponseDto getNewsById(Long id) {
+        return newsRepository.findById(id)
+                .map(NewsEntity::toResponseDto)
+                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+    }
+
+    // 생성
     public NewsResponseDto createNews(NewsRequestDto requestDto) {
         NewsEntity news = NewsEntity.builder()
                 .title(requestDto.getTitle())

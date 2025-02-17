@@ -36,12 +36,12 @@ public class NewsEntity extends BaseEntity {
     @Column(length = 255)
     private String imageUrl;
 
-    // 🔹 뉴스 상태 업데이트
+    // 뉴스 상태 업데이트
     public void updateStatus(Status status) {
         super.updateStatus(status);
     }
 
-    // 🔹 NewsEntity → NewsResponseDto 변환
+    // NewsEntity → NewsResponseDto 변환
     public NewsResponseDto toResponseDto() {
         return new NewsResponseDto(id, title, content, getCreatedAt(), imageUrl);
     }

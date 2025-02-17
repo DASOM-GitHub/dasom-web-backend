@@ -42,4 +42,5 @@ public class NewsService {
         NewsEntity savedNews = newsRepository.save(news);
         return savedNews.toResponseDto();
     }
+
 }

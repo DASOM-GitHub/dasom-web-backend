@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.applicant.entity;
 
+import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Builder
+@DynamicUpdate
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -32,7 +35,7 @@ public class Applicant {
     @Size(max = 16)
     private String name;
 
-    @Column(name = "student_no", nullable = false, length = 8)
+    @Column(name = "student_no", nullable = false, unique = true, length = 8)
     @Pattern(regexp = "^[0-9]{8}$")
     @Size(min = 8, max = 8)
     private String studentNo;
@@ -103,6 +106,16 @@ public class Applicant {
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();
+    }
+
+    public void overwrite(final ApplicantCreateRequestDto request) {
+        this.name = request.getName();
+        this.contact = request.getContact();
+        this.email = request.getEmail();
+        this.grade = request.getGrade();
+        this.reasonForApply = request.getReasonForApply();
+        this.activityWish = request.getActivityWish();
+        this.isPrivacyPolicyAgreed = request.getIsPrivacyPolicyAgreed();
     }
 
 }

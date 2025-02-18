@@ -9,9 +9,13 @@ import dmu.dasom.api.global.auth.dto.TokenBox;
 import dmu.dasom.api.global.auth.jwt.JwtUtil;
 import dmu.dasom.api.global.auth.userdetails.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 @RequiredArgsConstructor
 @Service
@@ -49,7 +53,13 @@ public class MemberServiceImpl implements MemberService {
     // 토큰 갱신
     @Override
     public TokenBox tokenRotation(final UserDetailsImpl userDetails) {
-        return jwtUtil.tokenRotation(userDetails);
+        final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        final Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        final GrantedAuthority auth = iterator.next();
+
+        final String authority = auth.getAuthority();
+
+        return jwtUtil.tokenRotation(userDetails.getUsername(), authority);
     }
 
 }

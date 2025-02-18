@@ -3,11 +3,15 @@ package dmu.dasom.api.domain.applicant;
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.applicant.service.ApplicantServiceImpl;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.global.dto.PageResponse;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +34,9 @@ class ApplicantServiceTest {
 
     @Mock
     private ApplicantRepository applicantRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private ApplicantServiceImpl applicantService;
@@ -123,4 +131,64 @@ class ApplicantServiceTest {
         assertEquals(ErrorCode.EMPTY_RESULT, exception.getErrorCode());
         verify(applicantRepository).findAllWithPageRequest(pageRequest);
     }
+
+    @Test
+    @DisplayName("메일 전송 - 서류 결과 메일 (DOCUMENT_RESULT)")
+    void sendEmailsToApplicants_documentResult() throws MessagingException {
+        // given
+        MailType mailType = MailType.DOCUMENT_RESULT;
+        Applicant applicant = mock(Applicant.class);
+        when(applicantRepository.findAll()).thenReturn(Collections.singletonList(applicant));
+        when(applicant.getEmail()).thenReturn("test@example.com");
+        when(applicant.getName()).thenReturn("지원자");
+
+        // when
+        assertDoesNotThrow(() -> applicantService.sendEmailsToApplicants(mailType));
+
+        // then
+        verify(applicantRepository).findAll();
+        verify(emailService).sendEmail("test@example.com", "지원자", mailType);
+    }
+
+    @Test
+    @DisplayName("메일 전송 - 최종 결과 메일 (FINAL_RESULT)")
+    void sendEmailsToApplicants_finalResult() throws MessagingException {
+        // given
+        MailType mailType = MailType.FINAL_RESULT;
+        Applicant passedApplicant = mock(Applicant.class);
+        Applicant failedApplicant = mock(Applicant.class);
+
+        when(applicantRepository.findByStatusIn(
+                List.of(ApplicantStatus.INTERVIEW_FAILED, ApplicantStatus.INTERVIEW_PASSED)))
+                .thenReturn(List.of(passedApplicant, failedApplicant));
+
+        when(passedApplicant.getEmail()).thenReturn("passed@example.com");
+        when(passedApplicant.getName()).thenReturn("합격자");
+        when(failedApplicant.getEmail()).thenReturn("failed@example.com");
+        when(failedApplicant.getName()).thenReturn("불합격자");
+
+        // when
+        assertDoesNotThrow(() -> applicantService.sendEmailsToApplicants(mailType));
+
+        // then
+        verify(applicantRepository).findByStatusIn(
+                List.of(ApplicantStatus.INTERVIEW_FAILED, ApplicantStatus.INTERVIEW_PASSED));
+        verify(emailService).sendEmail("passed@example.com", "합격자", mailType);
+        verify(emailService).sendEmail("failed@example.com", "불합격자", mailType);
+    }
+
+    @Test
+    @DisplayName("메일 전송 - 잘못된 MailType")
+    void sendEmailsToApplicants_invalidMailType() {
+        // given
+        MailType invalidMailType = null;
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            applicantService.sendEmailsToApplicants(invalidMailType);
+        });
+
+        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
+    }
+
 }

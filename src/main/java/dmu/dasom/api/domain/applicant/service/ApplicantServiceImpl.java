@@ -16,12 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class ApplicantServiceImpl implements ApplicantService {
 
     private final static int DEFAULT_PAGE_SIZE = 20;
@@ -32,6 +36,20 @@ public class ApplicantServiceImpl implements ApplicantService {
     // 지원자 저장
     @Override
     public void apply(final ApplicantCreateRequestDto request) {
+        final Optional<Applicant> applicant = findByStudentNo(request.getStudentNo());
+
+        // 이미 지원한 학번이 존재할 경우
+        if (applicant.isPresent()) {
+            // 덮어쓰기 확인 여부가 false일 경우 예외 발생
+            if (!request.getIsOverwriteConfirmed())
+                throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
+
+            // 기존 지원자 정보 갱신 수행
+            applicant.get().overwrite(request);
+            return;
+        }
+
+        // 새로운 지원자일 경우 저장
         applicantRepository.save(request.toEntity());
     }
 
@@ -87,6 +105,11 @@ public class ApplicantServiceImpl implements ApplicantService {
     private Applicant findById(final Long id) {
         return applicantRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_RESULT));
+    }
+
+    // 학번으로 지원자 존재 여부 확인
+    private Optional<Applicant> findByStudentNo(final String studentNo) {
+        return applicantRepository.findByStudentNo(studentNo);
     }
 
 }

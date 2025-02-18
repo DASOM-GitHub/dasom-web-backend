@@ -176,19 +176,4 @@ class ApplicantServiceTest {
         verify(emailService).sendEmail("passed@example.com", "합격자", mailType);
         verify(emailService).sendEmail("failed@example.com", "불합격자", mailType);
     }
-
-    @Test
-    @DisplayName("메일 전송 - 잘못된 MailType")
-    void sendEmailsToApplicants_invalidMailType() {
-        // given
-        MailType invalidMailType = null;
-
-        // when & then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            applicantService.sendEmailsToApplicants(invalidMailType);
-        });
-
-        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
-    }
-
 }

@@ -93,7 +93,7 @@ public class ApplicantServiceImpl implements ApplicantService {
                 break;
             case FINAL_RESULT:
                 applicants = applicantRepository.findByStatusIn(
-                        List.of(ApplicantStatus.INTERVIEW_PASSED,
+                        List.of(ApplicantStatus.INTERVIEW_FAILED,
                                 ApplicantStatus.INTERVIEW_PASSED)
                 );
                 break;

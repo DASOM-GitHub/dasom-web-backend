@@ -1,11 +1,10 @@
 package dmu.dasom.api.domain.email.service;
 
+import dmu.dasom.api.domain.email.enums.MailType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,21 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    public void sendEmail(String to, String subject, String templateName, String name) throws MessagingException {
+    public void sendEmail(String to, String name, MailType mailType) throws MessagingException {
+        // 메일 제목 및 템플릿 설정
+        String subject;
+        String templateName = switch (mailType) {
+            case DOCUMENT_RESULT -> {
+                subject = "서류 합격 안내";
+                yield "document-pass-template";
+            }
+            case FINAL_RESULT -> {
+                subject = "최종 합격 안내";
+                yield "final-pass-template";
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + mailType);
+        };
+
         // HTML 템플릿에 전달할 데이터 설정
         Context context = new Context();
         context.setVariable("name", name); // 지원자 이름 전달

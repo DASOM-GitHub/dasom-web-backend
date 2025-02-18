@@ -9,6 +9,7 @@ import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
@@ -81,55 +82,34 @@ public class ApplicantServiceImpl implements ApplicantService {
         return applicant.toApplicantDetailsResponse();
     }
 
-    // 지원자 이메일 보내기
     @Override
-    public void sendDocumentPassEmailsToApplicants(){
-        List<Applicant> applicants = applicantRepository.findAll();
+    public void sendEmailsToApplicants(MailType mailType) {
+        List<Applicant> applicants;
 
-        if(applicants.isEmpty()) {
-            throw new CustomException(ErrorCode.EMPTY_RESULT);
-        }
-
-        String subject = "다솜 서류 지원 결과";
-
-        for(Applicant applicant : applicants){
-            try {
-                emailService.sendEmail(
-                        applicant.getEmail(),
-                        subject,
-                        "document-pass-template",
-                        applicant.getName()
+        // MailType에 따라 지원자 조회
+        switch (mailType) {
+            case DOCUMENT_RESULT:
+                applicants = applicantRepository.findAll();
+                break;
+            case FINAL_RESULT:
+                applicants = applicantRepository.findByStatusIn(
+                        List.of(ApplicantStatus.INTERVIEW_PASSED,
+                                ApplicantStatus.INTERVIEW_PASSED)
                 );
-                log.info("이메일 전송 완료: {}", applicant.getEmail());
-            } catch (MessagingException e) {
-                log.error("이메일 전송 실패: {}", applicant.getEmail(), e);
-            }
-        }
-    }
-
-    @Override
-    public void sendFinalPassEmailsToDocumentPassApplicants() {
-        List<Applicant> applicants = applicantRepository.findByStatus(ApplicantStatus.DOCUMENT_PASSED);
-
-        if(applicants.isEmpty()){
-            throw new CustomException(ErrorCode.EMPTY_RESULT);
+                break;
+            default:
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
-        String subject = "다솜 최종 합격 결과";
         for (Applicant applicant : applicants) {
             try {
-                emailService.sendEmail(
-                        applicant.getEmail(),
-                        subject,
-                        "final-pass-template",
-                        applicant.getName()
-                );
-                log.info("이메일 전송 완료: {}", applicant.getEmail());
+                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
             } catch (MessagingException e) {
-                log.error("이메일 전송 실패: {}", applicant.getEmail(), e);
+                System.err.println("Failed to send email to: " + applicant.getEmail());
             }
         }
     }
+
 
     // Repository에서 ID로 지원자 조회
     private Applicant findById(final Long id) {

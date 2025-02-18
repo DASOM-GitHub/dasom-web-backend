@@ -18,6 +18,7 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long> {
 
     // 상태별 지원자 조회
     List<Applicant> findByStatus(ApplicantStatus status);
+    List<Applicant> findByStatusIn(List<ApplicantStatus> statuses);
 
     Optional<Applicant> findByStudentNo(final String studentNo);
 

@@ -79,7 +79,7 @@ public class AdminController {
         return ResponseEntity.ok(applicantService.updateApplicantStatus(id, request));
     }
 
-    @Operation(summary = "지원자 메일 전송")
+    @Operation(summary = "서류 결과 메일 전송")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "메일 전송 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청",
@@ -89,15 +89,37 @@ public class AdminController {
                             examples = {
                                     @ExampleObject(
                                             name = "전송 실패",
-                                            value = "{ \"code\": \"C013\", \"message\": \"이메일 전송에 실패하였습니다.\" }"
+                                            value = "{ \"code\": \"C014\", \"message\": \"이메일 전송에 실패하였습니다.\" }"
                                     )
                             }
                     )
             )
     })
-    @PostMapping("/applicants/send-email")
-    public ResponseEntity<String> sendEmailsToApplicants() {
-        applicantService.sendEmailsToApplicants();
+    @PostMapping("/applicants/send-document-pass-email")
+    public ResponseEntity<String> sendDocumentPassEmails() {
+        applicantService.sendDocumentPassEmailsToApplicants();
+        return ResponseEntity.ok("이메일 전송 성공");
+    }
+
+    @Operation(summary = "최종 결과 메일 전송")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "메일 전송 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "전송 실패",
+                                            value = "{ \"code\": \"C014\", \"message\": \"이메일 전송에 실패하였습니다.\" }"
+                                    )
+                            }
+                    )
+            )
+    })
+    @PostMapping("/applicants/send-final-pass-email")
+    public ResponseEntity<String> sendFinalPassEmail(){
+        applicantService.sendFinalPassEmailsToDocumentPassApplicants();
         return ResponseEntity.ok("이메일 전송 성공");
     }
 

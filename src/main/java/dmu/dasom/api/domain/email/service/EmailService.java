@@ -21,13 +21,13 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    public void sendEmail(String to, String subject, String name) throws MessagingException {
+    public void sendEmail(String to, String subject, String templateName, String name) throws MessagingException {
         // HTML 템플릿에 전달할 데이터 설정
         Context context = new Context();
         context.setVariable("name", name); // 지원자 이름 전달
 
         // HTML 템플릿 처리
-        String htmlBody = templateEngine.process("email-template", context);
+        String htmlBody = templateEngine.process(templateName, context);
 
         // 이메일 생성 및 전송
         MimeMessage message = javaMailSender.createMimeMessage();

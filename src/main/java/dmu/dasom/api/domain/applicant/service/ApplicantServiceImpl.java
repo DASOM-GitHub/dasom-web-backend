@@ -5,6 +5,7 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
@@ -64,19 +65,48 @@ public class ApplicantServiceImpl implements ApplicantService {
 
     // 지원자 이메일 보내기
     @Override
-    public void sendEmailsToApplicants(){
+    public void sendDocumentPassEmailsToApplicants(){
         List<Applicant> applicants = applicantRepository.findAll();
 
         if(applicants.isEmpty()) {
             throw new CustomException(ErrorCode.EMPTY_RESULT);
         }
 
-        String subject = "다솜 지원 결과";
+        String subject = "다솜 서류 지원 결과";
 
         for(Applicant applicant : applicants){
             try {
-                emailService.sendEmail(applicant.getEmail(), subject, applicant.getName());
-                log.info("HTML 이메일 전송 완료: {}", applicant.getEmail());
+                emailService.sendEmail(
+                        applicant.getEmail(),
+                        subject,
+                        "document-pass-template",
+                        applicant.getName()
+                );
+                log.info("이메일 전송 완료: {}", applicant.getEmail());
+            } catch (MessagingException e) {
+                log.error("이메일 전송 실패: {}", applicant.getEmail(), e);
+            }
+        }
+    }
+
+    @Override
+    public void sendFinalPassEmailsToDocumentPassApplicants() {
+        List<Applicant> applicants = applicantRepository.findByStatus(ApplicantStatus.DOCUMENT_PASSED);
+
+        if(applicants.isEmpty()){
+            throw new CustomException(ErrorCode.EMPTY_RESULT);
+        }
+
+        String subject = "다솜 최종 합격 결과";
+        for (Applicant applicant : applicants) {
+            try {
+                emailService.sendEmail(
+                        applicant.getEmail(),
+                        subject,
+                        "final-pass-template",
+                        applicant.getName()
+                );
+                log.info("이메일 전송 완료: {}", applicant.getEmail());
             } catch (MessagingException e) {
                 log.error("이메일 전송 실패: {}", applicant.getEmail(), e);
             }

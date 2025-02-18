@@ -16,4 +16,6 @@ public interface ApplicantService {
 
     ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request);
 
+    void sendEmailsToApplicants();
+
 }

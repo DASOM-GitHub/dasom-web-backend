@@ -8,12 +8,18 @@ import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.global.dto.PageResponse;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ApplicantServiceImpl implements ApplicantService {
@@ -21,6 +27,7 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final static int DEFAULT_PAGE_SIZE = 20;
 
     private final ApplicantRepository applicantRepository;
+    private final EmailService emailService;
 
     // 지원자 저장
     @Override
@@ -53,6 +60,27 @@ public class ApplicantServiceImpl implements ApplicantService {
         applicant.updateStatus(request.getStatus());
 
         return applicant.toApplicantDetailsResponse();
+    }
+
+    // 지원자 이메일 보내기
+    @Override
+    public void sendEmailsToApplicants(){
+        List<Applicant> applicants = applicantRepository.findAll();
+
+        if(applicants.isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_RESULT);
+        }
+
+        String subject = "다솜 지원 결과";
+
+        for(Applicant applicant : applicants){
+            try {
+                emailService.sendEmail(applicant.getEmail(), subject, applicant.getName());
+                log.info("HTML 이메일 전송 완료: {}", applicant.getEmail());
+            } catch (MessagingException e) {
+                log.error("이메일 전송 실패: {}", applicant.getEmail(), e);
+            }
+        }
     }
 
     // Repository에서 ID로 지원자 조회

@@ -1,5 +1,7 @@
 package dmu.dasom.api.domain.email.service;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,6 +23,9 @@ public class EmailService {
     private String from;
 
     public void sendEmail(String to, String name, MailType mailType) throws MessagingException {
+        if (mailType == null){
+            throw new CustomException(ErrorCode.MAIL_TYPE_NOT_VALID);
+        }
         // 메일 제목 및 템플릿 설정
         String subject;
         String templateName = switch (mailType) {

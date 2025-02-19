@@ -20,6 +20,8 @@ public enum ErrorCode {
     WRITE_FAIL(400, "C011", "데이터를 쓰는데 실패하였습니다."),
     EMPTY_RESULT(400, "C012", "조회 결과가 없습니다."),
     DUPLICATED_STUDENT_NO(400, "C013", "이미 등록된 학번입니다."),
+    SEND_EMAIL_FAIL(400, "C014", "이메일 전송에 실패하였습니다."),
+    MAIL_TYPE_NOT_VALID(400, "C015", "메일 타입이 올바르지 않습니다.")
     ;
 
     private final int status;

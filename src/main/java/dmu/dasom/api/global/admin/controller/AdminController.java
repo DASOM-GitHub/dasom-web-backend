@@ -110,11 +110,11 @@ public class AdminController {
                 examples = {
                     @ExampleObject(
                         name = "날짜 형식 오류",
-                        value = "{ \"code\": \"C014\", \"message\": \"날짜 형식이 올바르지 않습니다.\" }"
+                        value = "{ \"code\": \"C016\", \"message\": \"날짜 형식이 올바르지 않습니다.\" }"
                     ),
                     @ExampleObject(
                         name = "시간 형식 오류",
-                        value = "{ \"code\": \"C015\", \"message\": \"시간 형식이 올바르지 않습니다.\" }"
+                        value = "{ \"code\": \"C017\", \"message\": \"시간 형식이 올바르지 않습니다.\" }"
                     )
                 }
             )

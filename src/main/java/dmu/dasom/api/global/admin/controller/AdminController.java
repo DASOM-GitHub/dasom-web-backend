@@ -6,8 +6,10 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto;
 import dmu.dasom.api.domain.recruit.service.RecruitService;
+import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -123,8 +125,36 @@ public class AdminController {
     @PatchMapping("/recruit/schedule")
     public ResponseEntity<Void> modifyRecruitSchedule(@Valid @RequestBody final RecruitScheduleModifyRequestDto request) {
         recruitService.modifyRecruitSchedule(request);
-        return ResponseEntity.ok()
-            .build();
+        return ResponseEntity.ok().build();
+  
+    @Operation(
+            summary = "메일 전송",
+            description = "지원자들에게 서류 결과 또는 최종 결과 이메일을 발송합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "메일 전송 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "전송 실패",
+                                            value = "{ \"code\": \"C014\", \"message\": \"이메일 전송에 실패하였습니다.\" }"
+                                    )
+                            }
+                    )
+            )
+    })
+    @PostMapping("/applicants/send-email")
+    public ResponseEntity<Void> sendEmailsToApplicants(
+            @RequestParam
+            @Parameter(description = "메일 발송 타입", examples = {
+                    @ExampleObject(name = "서류 합격 메일", value = "DOCUMENT_PASS"),
+                    @ExampleObject(name = "최종 결과 메일", value = "FINAL_RESULT")
+            }) MailType mailType) {
+        applicantService.sendEmailsToApplicants(mailType);
+        return ResponseEntity.ok().build();
     }
 
 }

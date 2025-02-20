@@ -5,11 +5,16 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.global.dto.PageResponse;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import java.util.List;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -25,6 +33,7 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final static int DEFAULT_PAGE_SIZE = 20;
 
     private final ApplicantRepository applicantRepository;
+    private final EmailService emailService;
 
     // 지원자 저장
     @Override
@@ -72,6 +81,35 @@ public class ApplicantServiceImpl implements ApplicantService {
 
         return applicant.toApplicantDetailsResponse();
     }
+
+    @Override
+    public void sendEmailsToApplicants(MailType mailType) {
+        List<Applicant> applicants;
+
+        // MailType에 따라 지원자 조회
+        switch (mailType) {
+            case DOCUMENT_RESULT:
+                applicants = applicantRepository.findAll();
+                break;
+            case FINAL_RESULT:
+                applicants = applicantRepository.findByStatusIn(
+                        List.of(ApplicantStatus.INTERVIEW_FAILED,
+                                ApplicantStatus.INTERVIEW_PASSED)
+                );
+                break;
+            default:
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        for (Applicant applicant : applicants) {
+            try {
+                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
+            } catch (MessagingException e) {
+                System.err.println("Failed to send email to: " + applicant.getEmail());
+            }
+        }
+    }
+
 
     // Repository에서 ID로 지원자 조회
     private Applicant findById(final Long id) {

@@ -5,6 +5,7 @@ import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
 import dmu.dasom.api.domain.news.repository.NewsRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,4 +44,22 @@ public class NewsService {
         return savedNews.toResponseDto();
     }
 
+    // 수정
+    @Transactional
+    public NewsResponseDto updateNews(Long id, NewsRequestDto requestDto) {
+        NewsEntity news = newsRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+
+        news.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getImageUrl());
+        return news.toResponseDto();
+    }
+
+    // 삭제
+    @Transactional
+    public void deleteNews(Long id) {
+        NewsEntity news = newsRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+
+        newsRepository.delete(news);
+    }
 }

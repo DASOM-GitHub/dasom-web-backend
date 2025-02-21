@@ -5,7 +5,9 @@ import dmu.dasom.api.domain.common.Status;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -44,4 +46,25 @@ public class NewsEntity extends BaseEntity {
     public NewsResponseDto toResponseDto() {
         return new NewsResponseDto(id, title, content, getCreatedAt(), imageUrl);
     }
+
+    //수정기능
+    public void update(String title, String content, String imageUrl) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("제목은 필수입니다");
+        }
+        if (title.length() > 100) {
+            throw new IllegalArgumentException("제목은 100자까지");
+        }
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("내용은 필수입니다");
+        }
+        if (imageUrl != null && imageUrl.length() > 255) {
+            throw new IllegalArgumentException("이미지 URL은 255자까지");
+        }
+
+        this.title = title;
+        this.content = content;
+        this.imageUrl = imageUrl;
+    }
+
 }

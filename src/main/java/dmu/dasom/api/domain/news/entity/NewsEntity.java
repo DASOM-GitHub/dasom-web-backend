@@ -12,6 +12,7 @@ import lombok.*;
 
 @Getter
 @Entity
+@Table(name = "news")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,10 +29,12 @@ public class NewsEntity extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String title;
 
+    @Lob
     @NotNull
     @Schema(description = "뉴스 내용", example = "뉴스 예제 내용")
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
     private String content;
+
 
     @Schema(description = "뉴스 이미지 URL", example = "http://example.com/image.jpg")
     @Column(length = 255)

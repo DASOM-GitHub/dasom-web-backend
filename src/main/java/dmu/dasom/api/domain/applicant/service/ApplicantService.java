@@ -19,4 +19,6 @@ public interface ApplicantService {
 
     void sendEmailsToApplicants(MailType mailType);
 
+    ApplicantDetailsResponseDto getApplicantByStudentNo(final String studentNo);
+
 }

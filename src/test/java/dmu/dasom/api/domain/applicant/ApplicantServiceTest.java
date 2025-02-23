@@ -1,6 +1,7 @@
 package dmu.dasom.api.domain.applicant;
 
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
+import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
@@ -176,4 +177,39 @@ class ApplicantServiceTest {
         verify(emailService).sendEmail("passed@example.com", "합격자", mailType);
         verify(emailService).sendEmail("failed@example.com", "불합격자", mailType);
     }
+
+    @Test
+    @DisplayName("학번으로 지원자 조회 - 성공")
+    void getApplicantByStudentNo_success() {
+        // given
+        String studentNo = "20210000";
+        Applicant applicant = mock(Applicant.class);
+        when(applicantRepository.findByStudentNo(studentNo)).thenReturn(Optional.of(applicant));
+        when(applicant.toApplicantDetailsResponse()).thenReturn(mock(ApplicantDetailsResponseDto.class));
+
+        // when
+        ApplicantDetailsResponseDto applicantByStudentNo = applicantService.getApplicantByStudentNo(studentNo);
+
+        // then
+        assertNotNull(applicantByStudentNo);
+        verify(applicantRepository).findByStudentNo(studentNo);
+    }
+
+    @Test
+    @DisplayName("학번으로 지원자 조회 - 실패 (결과 없음)")
+    void getApplicantByStudentNo_fail() {
+        // given
+        String studentNo = "20210000";
+        when(applicantRepository.findByStudentNo(studentNo)).thenReturn(Optional.empty());
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            applicantService.getApplicantByStudentNo(studentNo);
+        });
+
+        // then
+        verify(applicantRepository).findByStudentNo(studentNo);
+        assertEquals(ErrorCode.ARGUMENT_NOT_VALID, exception.getErrorCode());
+    }
+
 }

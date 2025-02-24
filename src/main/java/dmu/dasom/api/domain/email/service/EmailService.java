@@ -30,11 +30,11 @@ public class EmailService {
         String subject;
         String templateName = switch (mailType) {
             case DOCUMENT_RESULT -> {
-                subject = "서류 합격 안내";
+                subject = "동양미래대학교 컴퓨터소프트웨어공학과 전공 동아리 DASOM 서류 결과 안내";
                 yield "document-pass-template";
             }
             case FINAL_RESULT -> {
-                subject = "최종 합격 안내";
+                subject = "동양미래대학교 컴퓨터소프트웨어공학과 전공 동아리 DASOM 최종 합격 안내";
                 yield "final-pass-template";
             }
             default -> throw new IllegalStateException("Unexpected value: " + mailType);

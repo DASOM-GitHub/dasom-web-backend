@@ -63,7 +63,6 @@ public class GoogleApiService {
             service.spreadsheets().values()
                     .update(spreadsheetId, range, body)
                     .setValueInputOption("USER_ENTERED")
-                    .setInsertDataOption("INSERT_ROWS")
                     .execute();
         }  catch (IOException | GeneralSecurityException e) {
             logger.error("구글 시트에 데이터를 쓰는 데 실패했습니다.", e);

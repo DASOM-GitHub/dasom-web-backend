@@ -70,6 +70,8 @@ class ApplicantServiceTest {
 
         when(request.toEntity()).thenReturn(mockApplicant);
         when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.empty());
+
+        // applicantRepository.save() 메소드에 대한 mocking 추가
         when(applicantRepository.save(any(Applicant.class))).thenReturn(mockApplicant);
 
         // GoogleApiService의 appendToSheet() 동작을 가짜로 설정

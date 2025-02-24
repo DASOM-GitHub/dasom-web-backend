@@ -44,3 +44,6 @@ application-dev.yml
 
 ### google ###
 src/main/resources/credentials/dasomGoogle.json
+
+### google ###
+src/main/resources/credentials/dasomGoogle.json

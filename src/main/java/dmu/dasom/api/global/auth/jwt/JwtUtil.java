@@ -38,10 +38,11 @@ public class JwtUtil {
     }
 
     // Access, Refresh 토큰 생성
-    public TokenBox generateTokenBox(final String email) {
+    public TokenBox generateTokenBox(final String email, final String authority) {
         final TokenBox tokenBox = TokenBox.builder()
                 .accessToken(generateToken(email, accessTokenExpiration))
                 .refreshToken(generateToken(email, refreshTokenExpiration))
+                .authority(authority)
                 .build();
 
         saveTokens(tokenBox, email);
@@ -132,9 +133,9 @@ public class JwtUtil {
     }
 
     // Access, Refresh 토큰 갱신
-    public TokenBox tokenRotation(final UserDetailsImpl userDetails) {
-        blacklistTokens(userDetails.getUsername());
-        return generateTokenBox(userDetails.getUsername());
+    public TokenBox tokenRotation(final String email, final String authority) {
+        blacklistTokens(email);
+        return generateTokenBox(email, authority);
     }
 
 }

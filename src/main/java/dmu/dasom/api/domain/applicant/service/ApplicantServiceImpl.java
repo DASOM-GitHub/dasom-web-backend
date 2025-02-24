@@ -5,26 +5,53 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.global.dto.PageResponse;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
+import java.util.List;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class ApplicantServiceImpl implements ApplicantService {
 
     private final static int DEFAULT_PAGE_SIZE = 20;
 
     private final ApplicantRepository applicantRepository;
+    private final EmailService emailService;
 
     // 지원자 저장
     @Override
     public void apply(final ApplicantCreateRequestDto request) {
+        final Optional<Applicant> applicant = findByStudentNo(request.getStudentNo());
+
+        // 이미 지원한 학번이 존재할 경우
+        if (applicant.isPresent()) {
+            // 덮어쓰기 확인 여부가 false일 경우 예외 발생
+            if (!request.getIsOverwriteConfirmed())
+                throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
+
+            // 기존 지원자 정보 갱신 수행
+            applicant.get().overwrite(request);
+            return;
+        }
+
+        // 새로운 지원자일 경우 저장
         applicantRepository.save(request.toEntity());
     }
 
@@ -55,10 +82,51 @@ public class ApplicantServiceImpl implements ApplicantService {
         return applicant.toApplicantDetailsResponse();
     }
 
+    @Override
+    public void sendEmailsToApplicants(MailType mailType) {
+        List<Applicant> applicants;
+
+        // MailType에 따라 지원자 조회
+        switch (mailType) {
+            case DOCUMENT_RESULT:
+                applicants = applicantRepository.findAll();
+                break;
+            case FINAL_RESULT:
+                applicants = applicantRepository.findByStatusIn(
+                        List.of(ApplicantStatus.INTERVIEW_FAILED,
+                                ApplicantStatus.INTERVIEW_PASSED)
+                );
+                break;
+            default:
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        for (Applicant applicant : applicants) {
+            try {
+                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
+            } catch (MessagingException e) {
+                System.err.println("Failed to send email to: " + applicant.getEmail());
+            }
+        }
+    }
+
+    // 학번으로 지원자 조회
+    @Override
+    public ApplicantDetailsResponseDto getApplicantByStudentNo(final String studentNo) {
+        return findByStudentNo(studentNo)
+            .map(Applicant::toApplicantDetailsResponse)
+            .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
+    }
+
     // Repository에서 ID로 지원자 조회
     private Applicant findById(final Long id) {
         return applicantRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_RESULT));
+    }
+
+    // 학번으로 지원자 존재 여부 확인
+    private Optional<Applicant> findByStudentNo(final String studentNo) {
+        return applicantRepository.findByStudentNo(studentNo);
     }
 
 }

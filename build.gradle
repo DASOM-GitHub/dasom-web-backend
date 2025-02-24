@@ -39,7 +39,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
@@ -51,6 +53,9 @@ dependencies {
 
 	implementation 'com.google.apis:google-api-services-sheets:v4-rev516-1.23.0'
 	implementation 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
+
+
+
 
 
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'

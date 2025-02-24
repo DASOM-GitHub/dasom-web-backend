@@ -1,5 +1,7 @@
 package dmu.dasom.api.domain.news.service;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.news.dto.NewsRequestDto;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
@@ -29,7 +31,7 @@ public class NewsService {
     public NewsResponseDto getNewsById(Long id) {
         return newsRepository.findById(id)
                 .map(NewsEntity::toResponseDto)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
     }
 
     // 생성
@@ -48,7 +50,7 @@ public class NewsService {
     @Transactional
     public NewsResponseDto updateNews(Long id, NewsRequestDto requestDto) {
         NewsEntity news = newsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         news.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getImageUrl());
         return news.toResponseDto();
@@ -58,8 +60,9 @@ public class NewsService {
     @Transactional
     public void deleteNews(Long id) {
         NewsEntity news = newsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         newsRepository.delete(news);
     }
+
 }

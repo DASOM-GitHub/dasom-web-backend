@@ -52,7 +52,7 @@ class EmailServiceTest {
         String name = "지원자";
         MailType mailType = MailType.DOCUMENT_RESULT;
 
-        String expectedTemplate = "document-pass-template";
+        String expectedTemplate = "email-template";
         String expectedHtmlBody = "<html><body>Document Pass</body></html>";
         when(templateEngine.process(eq(expectedTemplate), any(Context.class))).thenReturn(expectedHtmlBody);
 
@@ -76,7 +76,7 @@ class EmailServiceTest {
         String name = "지원자";
         MailType mailType = MailType.FINAL_RESULT;
 
-        String expectedTemplate = "final-pass-template";
+        String expectedTemplate = "email-template";
         String expectedHtmlBody = "<html><body>Final Pass</body></html>";
         when(templateEngine.process(eq(expectedTemplate), any(Context.class))).thenReturn(expectedHtmlBody);
 

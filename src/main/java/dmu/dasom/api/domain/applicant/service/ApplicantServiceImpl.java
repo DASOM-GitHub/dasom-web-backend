@@ -11,10 +11,12 @@ import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
+import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class ApplicantServiceImpl implements ApplicantService {
 
     private final ApplicantRepository applicantRepository;
     private final EmailService emailService;
+    private final GoogleApiService googleApiService;
 
     // 지원자 저장
     @Override
@@ -46,13 +49,15 @@ public class ApplicantServiceImpl implements ApplicantService {
             if (!request.getIsOverwriteConfirmed())
                 throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
 
-            // 기존 지원자 정보 갱신 수행
-            applicant.get().overwrite(request);
+            Applicant existingApplicant = applicant.get();
+            existingApplicant.overwrite(request);
+
+            googleApiService.updateSheet(List.of(existingApplicant));
             return;
         }
 
-        // 새로운 지원자일 경우 저장
-        applicantRepository.save(request.toEntity());
+        Applicant savedApplicant = applicantRepository.save(request.toEntity());
+        googleApiService.appendToSheet(List.of(savedApplicant));
     }
 
     // 지원자 조회
@@ -77,7 +82,9 @@ public class ApplicantServiceImpl implements ApplicantService {
     @Override
     public ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request) {
         final Applicant applicant = findById(id);
+
         applicant.updateStatus(request.getStatus());
+        googleApiService.updateSheet(List.of(applicant));
 
         return applicant.toApplicantDetailsResponse();
     }

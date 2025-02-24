@@ -16,6 +16,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Builder
@@ -80,6 +81,23 @@ public class Applicant {
 
     public void updateStatus(final ApplicantStatus status) {
         this.status = status;
+    }
+
+    public List<Object> toGoogleSheetRow(){
+        return List.of(
+                this.id,
+                this.name,
+                this.studentNo,
+                this.contact,
+                this.email,
+                this.grade,
+                this.reasonForApply,
+                this.activityWish,
+                this.isPrivacyPolicyAgreed,
+                this.status.name(),
+                this.createdAt.toString(),
+                this.updatedAt.toString()
+        );
     }
 
     public ApplicantResponseDto toApplicantResponse() {

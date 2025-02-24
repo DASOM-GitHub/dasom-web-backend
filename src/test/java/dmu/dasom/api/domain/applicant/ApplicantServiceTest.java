@@ -11,6 +11,7 @@ import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
+import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -42,19 +44,43 @@ class ApplicantServiceTest {
     @InjectMocks
     private ApplicantServiceImpl applicantService;
 
+    @Mock
+    private GoogleApiService googleApiService;
+
     @Test
     @DisplayName("지원자 저장 - 성공")
     void apply_success() {
         // given
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
         when(request.getStudentNo()).thenReturn("20210000");
+
+        Applicant mockApplicant = Applicant.builder()
+                .name("홍길동")
+                .studentNo("20240001")
+                .contact("010-1234-5678")
+                .email("hong@example.com")
+                .grade(2)
+                .reasonForApply("팀 활동 경험을 쌓고 싶습니다.")
+                .activityWish("프로그래밍 스터디 참여")
+                .isPrivacyPolicyAgreed(true)
+                .status(ApplicantStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(request.toEntity()).thenReturn(mockApplicant);
         when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.empty());
+        when(applicantRepository.save(any(Applicant.class))).thenReturn(mockApplicant);
+
+        // GoogleApiService의 appendToSheet() 동작을 가짜로 설정
+        doNothing().when(googleApiService).appendToSheet(anyList());
 
         // when
         applicantService.apply(request);
 
         // then
-        verify(applicantRepository).save(request.toEntity());
+        verify(applicantRepository).save(mockApplicant);
+        verify(googleApiService).appendToSheet(List.of(mockApplicant));
     }
 
     @Test
@@ -82,8 +108,8 @@ class ApplicantServiceTest {
         // given
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
         when(request.getStudentNo()).thenReturn("20210000");
-        Applicant applicant = mock(Applicant.class);
-        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(applicant));
+        Applicant existingApplicant = mock(Applicant.class); // 기존 Applicant 객체 모킹
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(existingApplicant));
         when(request.getIsOverwriteConfirmed()).thenReturn(true);
 
         // when
@@ -91,7 +117,8 @@ class ApplicantServiceTest {
 
         // then
         verify(applicantRepository).findByStudentNo("20210000");
-        verify(applicant).overwrite(request);
+        verify(existingApplicant).overwrite(request);
+        verify(googleApiService).updateSheet(List.of(existingApplicant));
     }
 
     @Test

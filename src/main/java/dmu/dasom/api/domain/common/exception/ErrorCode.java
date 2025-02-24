@@ -20,6 +20,13 @@ public enum ErrorCode {
     WRITE_FAIL(400, "C011", "데이터를 쓰는데 실패하였습니다."),
     EMPTY_RESULT(400, "C012", "조회 결과가 없습니다."),
     DUPLICATED_STUDENT_NO(400, "C013", "이미 등록된 학번입니다."),
+    SEND_EMAIL_FAIL(400, "C014", "이메일 전송에 실패하였습니다."),
+    MAIL_TYPE_NOT_VALID(400, "C015", "메일 타입이 올바르지 않습니다."),
+    INVALID_DATETIME_FORMAT(400, "C016", "날짜 형식이 올바르지 않습니다."),
+    INVALID_TIME_FORMAT(400, "C017", "시간 형식이 올바르지 않습니다."),
+    INVALID_INQUIRY_PERIOD(400, "C018", "조회 기간이 아닙니다."),
+    SHEET_WRITE_FAIL(400, "C019", "시트에 데이터를 쓰는데 실패하였습니다."),
+    SHEET_READ_FAIL(400, "C200", "시트에 데이터를 쓰는데 실패하였습니다."),
     ;
 
     private final int status;

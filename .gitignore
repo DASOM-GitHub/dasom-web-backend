@@ -41,3 +41,6 @@ out/
 
 ### dev ###
 application-dev.yml
+
+### google ###
+src/main/resources/credentials/dasomGoogle.json

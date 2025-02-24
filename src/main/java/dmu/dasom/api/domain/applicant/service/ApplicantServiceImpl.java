@@ -5,12 +5,17 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +26,7 @@ import java.util.Optional;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional
@@ -29,10 +35,8 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final static int DEFAULT_PAGE_SIZE = 20;
 
     private final ApplicantRepository applicantRepository;
+    private final EmailService emailService;
     private final GoogleApiService googleApiService;
-
-    @Value("${google.spreadsheet.id}")
-    private String spreadsheetId;
 
     // 지원자 저장
     @Override
@@ -45,55 +49,15 @@ public class ApplicantServiceImpl implements ApplicantService {
             if (!request.getIsOverwriteConfirmed())
                 throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
 
-            // 기존 지원자 정보 갱신 수행
             Applicant existingApplicant = applicant.get();
-            applicant.get().overwrite(request);
+            existingApplicant.overwrite(request);
 
-            // 구글 시트 업데이트를 위한 데이터 구성
-            List<List<Object>> values = List.of(List.of(
-                    existingApplicant.getId(),
-                    existingApplicant.getName(),
-                    existingApplicant.getStudentNo(),
-                    existingApplicant.getContact(),
-                    existingApplicant.getEmail(),
-                    existingApplicant.getGrade(),
-                    existingApplicant.getReasonForApply(),
-                    existingApplicant.getActivityWish(),
-                    existingApplicant.getIsPrivacyPolicyAgreed(),
-                    existingApplicant.getCreatedAt(),
-                    existingApplicant.getUpdatedAt()
-            ));
-
-            // 구글 시트에서 해당 지원자의 행 번호 조회(A열에 저장된 지원자 id 기준)
-            int rowNumber = googleApiService.findRowByApplicantId(spreadsheetId, "Sheet1", existingApplicant.getId());
-
-            // 찾아낸 행 번호에 따라 범위를 지정
-            String range = "Sheet1!A" + rowNumber + ":K" + rowNumber;
-            googleApiService.updateSheet(spreadsheetId, range, values);
+            googleApiService.updateSheet(List.of(existingApplicant));
             return;
         }
 
-        // 새로운 지원자일 경우 저장
-        Applicant newApplicant = applicantRepository.save(request.toEntity());
-
-        // 스프레드 시트에 기록할 데이터
-        List<List<Object>> values = List.of(List.of(
-                newApplicant.getId(),
-                newApplicant.getName(),
-                newApplicant.getStudentNo(),
-                newApplicant.getContact(),
-                newApplicant.getEmail(),
-                newApplicant.getGrade(),
-                newApplicant.getReasonForApply(),
-                newApplicant.getActivityWish(),
-                newApplicant.getIsPrivacyPolicyAgreed(),
-                newApplicant.getCreatedAt(),
-                newApplicant.getUpdatedAt()
-        ));
-
-        String range = "Sheet1!A:K";
-
-        googleApiService.writeToSheet(spreadsheetId, range, values);
+        Applicant savedApplicant = applicantRepository.save(request.toEntity());
+        googleApiService.appendToSheet(List.of(savedApplicant));
     }
 
     // 지원자 조회
@@ -118,9 +82,47 @@ public class ApplicantServiceImpl implements ApplicantService {
     @Override
     public ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request) {
         final Applicant applicant = findById(id);
+
         applicant.updateStatus(request.getStatus());
+        googleApiService.updateSheet(List.of(applicant));
 
         return applicant.toApplicantDetailsResponse();
+    }
+
+    @Override
+    public void sendEmailsToApplicants(MailType mailType) {
+        List<Applicant> applicants;
+
+        // MailType에 따라 지원자 조회
+        switch (mailType) {
+            case DOCUMENT_RESULT:
+                applicants = applicantRepository.findAll();
+                break;
+            case FINAL_RESULT:
+                applicants = applicantRepository.findByStatusIn(
+                        List.of(ApplicantStatus.INTERVIEW_FAILED,
+                                ApplicantStatus.INTERVIEW_PASSED)
+                );
+                break;
+            default:
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+
+        for (Applicant applicant : applicants) {
+            try {
+                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
+            } catch (MessagingException e) {
+                System.err.println("Failed to send email to: " + applicant.getEmail());
+            }
+        }
+    }
+
+    // 학번으로 지원자 조회
+    @Override
+    public ApplicantDetailsResponseDto getApplicantByStudentNo(final String studentNo) {
+        return findByStudentNo(studentNo)
+            .map(Applicant::toApplicantDetailsResponse)
+            .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
     }
 
     // Repository에서 ID로 지원자 조회

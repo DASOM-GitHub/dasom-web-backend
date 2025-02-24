@@ -19,4 +19,8 @@ public class TokenBox {
     @NotNull
     private String refreshToken;
 
+    @Schema(description = "권한")
+    @NotNull
+    private String authority;
+
 }

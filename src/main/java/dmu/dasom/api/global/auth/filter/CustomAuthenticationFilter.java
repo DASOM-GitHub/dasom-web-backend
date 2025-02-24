@@ -17,9 +17,12 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -47,12 +50,19 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         // 기존 토큰 만료 처리
         jwtUtil.blacklistTokens(authResult.getName());
 
+        final Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
+        final Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        final GrantedAuthority auth = iterator.next();
+
+        final String authority = auth.getAuthority();
+
         // 토큰 생성
-        final TokenBox tokenBox = jwtUtil.generateTokenBox(authResult.getName());
+        final TokenBox tokenBox = jwtUtil.generateTokenBox(authResult.getName(), authority);
 
         response.setStatus(HttpStatus.OK.value());
         response.setHeader("Access-Token", tokenBox.getAccessToken());
         response.setHeader("Refresh-Token", tokenBox.getRefreshToken());
+        response.setHeader("Authority", tokenBox.getAuthority());
     }
 
     @Override

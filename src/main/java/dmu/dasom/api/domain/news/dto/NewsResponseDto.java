@@ -21,7 +21,7 @@ public class NewsResponseDto {
     @Schema(description = "작성일", example = "2025-02-14T12:00:00")
     private LocalDateTime createdAt;
 
-    @Schema(description = "뉴스 이미지 URL", example = "http://example.com/image.jpg", nullable = true)
+    @Schema(description = "뉴스 이미지 URL", example = "https://example.com/image.jpg", nullable = true)
     private String imageUrl;
 
     public NewsResponseDto(Long id, String title, String content, LocalDateTime createdAt, String imageUrl) {
@@ -31,4 +31,5 @@ public class NewsResponseDto {
         this.createdAt = createdAt;
         this.imageUrl = imageUrl;
     }
+
 }

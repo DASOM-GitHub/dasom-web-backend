@@ -31,7 +31,7 @@ public class NewsEntity extends BaseEntity {
     private String content;
 
     @Column(length = 255)
-    @Schema(description = "뉴스 이미지 URL", example = "http://example.com/image.jpg")
+    @Schema(description = "뉴스 이미지 URL", example = "https://example.com/image.jpg")
     private String imageUrl;
 
     // 뉴스 상태 업데이트

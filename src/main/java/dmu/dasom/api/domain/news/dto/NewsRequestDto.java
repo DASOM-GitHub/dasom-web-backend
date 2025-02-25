@@ -25,4 +25,5 @@ public class NewsRequestDto {
     @Size(max = 255, message = "이미지 URL은 최대 255자입니다.")
     @Schema(description = "뉴스 이미지 URL", example = "http://example.com/image.jpg", nullable = true)
     private String imageUrl;
+
 }

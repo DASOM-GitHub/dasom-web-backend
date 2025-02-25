@@ -110,6 +110,13 @@ public class ApplicantServiceImpl implements ApplicantService {
         }
     }
 
+    // 학번으로 지원자 조회
+    @Override
+    public ApplicantDetailsResponseDto getApplicantByStudentNo(final String studentNo) {
+        return findByStudentNo(studentNo)
+            .map(Applicant::toApplicantDetailsResponse)
+            .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
+    }
 
     // Repository에서 ID로 지원자 조회
     private Applicant findById(final Long id) {

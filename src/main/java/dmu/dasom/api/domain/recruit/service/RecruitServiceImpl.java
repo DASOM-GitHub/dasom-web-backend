@@ -1,11 +1,17 @@
 package dmu.dasom.api.domain.recruit.service;
 
+import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
+import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitConfigResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto;
 import dmu.dasom.api.domain.recruit.entity.Recruit;
 import dmu.dasom.api.domain.recruit.enums.ConfigKey;
+import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
 import dmu.dasom.api.domain.recruit.repository.RecruitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +29,7 @@ import java.util.List;
 public class RecruitServiceImpl implements RecruitService {
 
     private final RecruitRepository recruitRepository;
+    private final ApplicantService applicantService;
 
     // 모집 일정 설정 조회
     @Override
@@ -47,6 +54,39 @@ public class RecruitServiceImpl implements RecruitService {
 
         final LocalDateTime dateTime = parseDateTimeFormat(request.getValue());
         config.updateDateTime(dateTime);
+    }
+
+    // 합격 결과 확인
+    @Override
+    public ResultCheckResponseDto checkResult(final ResultCheckRequestDto request) {
+        final Recruit recruit = switch (request.getType()) {
+            case DOCUMENT_PASS -> findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
+            case INTERVIEW_PASS -> findByKey(ConfigKey.INTERVIEW_PASS_ANNOUNCEMENT);
+        };
+        final LocalDateTime parsedTime = parseDateTimeFormat(recruit.getValue());
+
+        // 설정 된 시간이 현재 시간보다 이전인 경우 예외 발생
+        final LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(parsedTime))
+            throw new CustomException(ErrorCode.INVALID_INQUIRY_PERIOD);
+
+        final ApplicantDetailsResponseDto applicant = applicantService.getApplicantByStudentNo(request.getStudentNo());
+
+        // 연락처 뒷자리가 일치하지 않을 경우 예외 발생
+        if (!applicant.getContact().split("-")[2].equals(request.getContactLastDigit()))
+            throw new CustomException(ErrorCode.ARGUMENT_NOT_VALID);
+
+        // 합격 여부 반환
+        return ResultCheckResponseDto.builder()
+            .type(request.getType())
+            .studentNo(applicant.getStudentNo())
+            .name(applicant.getName())
+            .isPassed(request.getType().equals(ResultCheckType.DOCUMENT_PASS) ?
+                applicant.getStatus()
+                    .equals(ApplicantStatus.DOCUMENT_PASSED) :
+                applicant.getStatus()
+                    .equals(ApplicantStatus.INTERVIEW_PASSED))
+            .build();
     }
 
     // DB에 저장된 모든 Recruit 객체를 찾아 반환

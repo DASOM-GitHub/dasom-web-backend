@@ -1,11 +1,17 @@
 package dmu.dasom.api.domain.recruit;
 
+import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
+import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
+import dmu.dasom.api.domain.applicant.service.ApplicantServiceImpl;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitConfigResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto;
 import dmu.dasom.api.domain.recruit.entity.Recruit;
 import dmu.dasom.api.domain.recruit.enums.ConfigKey;
+import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
 import dmu.dasom.api.domain.recruit.repository.RecruitRepository;
 import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +35,9 @@ class RecruitServiceTest {
 
     @Mock
     private RecruitRepository recruitRepository;
+
+    @Mock
+    private ApplicantServiceImpl applicantService;
 
     @InjectMocks
     private RecruitServiceImpl recruitService;
@@ -83,4 +93,90 @@ class RecruitServiceTest {
         // then
         assertEquals(ErrorCode.INVALID_TIME_FORMAT, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 성공")
+    void checkResult_success() {
+        // given
+        Recruit recruit = mock(Recruit.class);
+        when(recruitRepository.findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT)).thenReturn(Optional.of(recruit));
+        String pastDateTime = LocalDateTime.now().minusHours(1)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+        when(recruit.getValue()).thenReturn(pastDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(request.getContactLastDigit()).thenReturn("1234");
+
+        ApplicantDetailsResponseDto applicant = mock(ApplicantDetailsResponseDto.class);
+        when(applicant.getContact()).thenReturn("010-5678-1234");
+        when(applicant.getStatus()).thenReturn(ApplicantStatus.DOCUMENT_PASSED);
+        when(applicant.getStudentNo()).thenReturn("20210000");
+        when(applicant.getName()).thenReturn("TestName");
+        when(applicantService.getApplicantByStudentNo("20210000")).thenReturn(applicant);
+
+        // when
+        ResultCheckResponseDto result = recruitService.checkResult(request);
+
+        // then
+        assertNotNull(result);
+        assertTrue(result.getIsPassed());
+        verify(recruitRepository, times(1)).findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
+        verify(applicantService, times(1)).getApplicantByStudentNo("20210000");
+    }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 실패 (확인 기간 아님)")
+    void checkResult_fail_inquiryPeriod() {
+        // given
+        Recruit recruit = mock(Recruit.class);
+        when(recruitRepository.findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT)).thenReturn(Optional.of(recruit));
+        String futureDateTime = LocalDateTime.now().plusHours(1)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+        when(recruit.getValue()).thenReturn(futureDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            recruitService.checkResult(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.INVALID_INQUIRY_PERIOD, exception.getErrorCode());
+        verify(recruitRepository, times(1)).findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
+    }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 실패 (연락처 뒷자리 불일치)")
+    void checkResult_fail_contactMismatch() {
+        // given
+        Recruit recruit = mock(Recruit.class);
+        when(recruitRepository.findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT)).thenReturn(Optional.of(recruit));
+        String pastDateTime = LocalDateTime.now().minusHours(1)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+        when(recruit.getValue()).thenReturn(pastDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(request.getContactLastDigit()).thenReturn("0000");
+
+        ApplicantDetailsResponseDto applicant = mock(ApplicantDetailsResponseDto.class);
+        when(applicant.getContact()).thenReturn("010-5678-1234");
+        when(applicantService.getApplicantByStudentNo("20210000")).thenReturn(applicant);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            recruitService.checkResult(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.ARGUMENT_NOT_VALID, exception.getErrorCode());
+        verify(recruitRepository, times(1)).findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
+        verify(applicantService, times(1)).getApplicantByStudentNo("20210000");
+    }
+
 }

@@ -1,5 +1,7 @@
 package dmu.dasom.api.domain.news;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.news.dto.NewsRequestDto;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
@@ -32,8 +34,8 @@ class NewsServiceTest {
     @DisplayName("뉴스 전체 조회 테스트")
     void getAllNews() {
         // Given
-        NewsEntity news1 = NewsEntity.builder().id(1L).title("뉴스1").content("내용1").imageUrl("url1").build();
-        NewsEntity news2 = NewsEntity.builder().id(2L).title("뉴스2").content("내용2").imageUrl("url2").build();
+        NewsEntity news1 = new NewsEntity(1L, "뉴스1", "내용1", "url1");
+        NewsEntity news2 = new NewsEntity(2L, "뉴스2", "내용2", "url2");
 
         when(newsRepository.findAll()).thenReturn(List.of(news1, news2));
 
@@ -51,7 +53,7 @@ class NewsServiceTest {
     void getNewsById_Success() {
         // Given
         Long id = 1L;
-        NewsEntity news = NewsEntity.builder().id(id).title("뉴스1").content("내용1").imageUrl("url1").build();
+        NewsEntity news = new NewsEntity(id, "뉴스1", "내용1", "url1");
 
         when(newsRepository.findById(id)).thenReturn(Optional.of(news));
 
@@ -73,8 +75,8 @@ class NewsServiceTest {
         when(newsRepository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> newsService.getNewsById(id));
-        assertThat(exception.getMessage()).isEqualTo("해당 뉴스가 존재하지 않습니다. ID: " + id);
+        CustomException exception = assertThrows(CustomException.class, () -> newsService.getNewsById(id));
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
         verify(newsRepository, times(1)).findById(id);
     }
 
@@ -90,12 +92,7 @@ class NewsServiceTest {
                 .imageUrl(requestDto.getImageUrl())
                 .build();
 
-        NewsEntity savedNews = NewsEntity.builder()
-                .id(1L)
-                .title(news.getTitle())
-                .content(news.getContent())
-                .imageUrl(news.getImageUrl())
-                .build();
+        NewsEntity savedNews = new NewsEntity(1L, news.getTitle(), news.getContent(), news.getImageUrl());
 
         when(newsRepository.save(any(NewsEntity.class))).thenReturn(savedNews);
 
@@ -103,12 +100,52 @@ class NewsServiceTest {
         NewsResponseDto responseDto = newsService.createNews(requestDto);
 
         // Then
-        assertThat(responseDto.getId()).isEqualTo(1L); // 저장된 뉴스의 ID 할당확인
+        assertThat(responseDto.getId()).isEqualTo(1L);
         assertThat(responseDto.getTitle()).isEqualTo("새 뉴스");
         assertThat(responseDto.getContent()).isEqualTo("새 내용");
         assertThat(responseDto.getImageUrl()).isEqualTo("새 이미지");
 
-        verify(newsRepository, times(1)).save(any(NewsEntity.class)); // save() 호출 검증
+        verify(newsRepository, times(1)).save(any(NewsEntity.class));
+    }
+
+    @Test
+    @DisplayName("뉴스 수정 테스트")
+    void updateNews() {
+        // Given
+        Long id = 1L;
+        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", "기존 이미지");
+
+        NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", "수정된 이미지");
+
+        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
+
+        // When
+        NewsResponseDto updatedNews = newsService.updateNews(id, updateRequest);
+
+        // Then
+        assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
+        assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
+        assertThat(updatedNews.getImageUrl()).isEqualTo("수정된 이미지");
+
+        verify(newsRepository, times(1)).findById(id);
+    }
+
+    @Test
+    @DisplayName("뉴스 삭제 테스트")
+    void deleteNews() {
+        // Given
+        Long id = 1L;
+        NewsEntity existingNews = new NewsEntity(id, "삭제할 뉴스", "삭제할 내용", "삭제할 이미지");
+
+        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
+        doNothing().when(newsRepository).delete(existingNews);
+
+        // When
+        newsService.deleteNews(id);
+
+        // Then
+        verify(newsRepository, times(1)).findById(id);
+        verify(newsRepository, times(1)).delete(existingNews);
     }
 
 }

@@ -78,13 +78,13 @@ public class GoogleApiService {
         processSheetsUpdate(applicants, false);
     }
 
-    private int findRowIndexByStudentNo(String spreadSheetId, String sheetName, String studentNo){
+    public int findRowIndexByStudentNo(String spreadSheetId, String sheetName, String studentNo){
         try {
             List<List<Object>> rows = readSheet(spreadSheetId, sheetName + "!A:L"); // A열부터 L열까지 읽기
 
             for (int i = 0; i < rows.size(); i++){
                 List<Object> row = rows.get(i);
-                if(!row.isEmpty() && row.get(2).equals(studentNo)){
+                if(!row.isEmpty() && row.get(2).equals(studentNo)){ // 학번(Student No)이 3번째 열(A=0 기준)
                     return i + 1;
                 }
             }
@@ -174,5 +174,7 @@ public class GoogleApiService {
             throw new CustomException(ErrorCode.SHEET_WRITE_FAIL);
         }
     }
+
+
 
 }

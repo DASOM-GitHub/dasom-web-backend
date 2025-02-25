@@ -35,6 +35,7 @@ public class NewsService {
     }
 
     // 생성
+    @Transactional
     public NewsResponseDto createNews(NewsRequestDto requestDto) {
         NewsEntity news = NewsEntity.builder()
                 .title(requestDto.getTitle())

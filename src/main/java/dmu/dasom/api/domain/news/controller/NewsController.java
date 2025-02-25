@@ -40,7 +40,7 @@ public class NewsController {
     @Operation(summary = "소식 상세 조회", description = "ID로 특정 소식을 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "소식을 찾을 수 없음")
+            @ApiResponse(responseCode = "400", description = "소식을 찾을 수 없음")
     })
     @GetMapping("/{id}")
     public ResponseEntity<NewsResponseDto> getNewsById(@PathVariable Long id) {
@@ -66,7 +66,7 @@ public class NewsController {
     @Operation(summary = "소식 수정", description = "ID로 특정 소식을 수정")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "수정 성공"),
-            @ApiResponse(responseCode = "404", description = "소식을 찾을 수 없음")
+            @ApiResponse(responseCode = "400", description = "소식을 찾을 수 없음")
     })
     @PutMapping("/{id}")
     public ResponseEntity<NewsResponseDto> updateNews(@PathVariable Long id, @Valid @RequestBody NewsRequestDto requestDto) {
@@ -78,7 +78,7 @@ public class NewsController {
     @Operation(summary = "소식 삭제", description = "ID로 특정 소식을 삭제")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
-            @ApiResponse(responseCode = "404", description = "소식을 찾을 수 없음")
+            @ApiResponse(responseCode = "400", description = "소식을 찾을 수 없음")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNews(@PathVariable Long id) {

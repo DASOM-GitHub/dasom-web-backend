@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Schema(name = "NewsResponseDto", description = "뉴스 응답 DTO")
@@ -21,15 +22,15 @@ public class NewsResponseDto {
     @Schema(description = "작성일", example = "2025-02-14T12:00:00")
     private LocalDateTime createdAt;
 
-    @Schema(description = "뉴스 이미지 URL", example = "https://example.com/image.jpg", nullable = true)
-    private String imageUrl;
+    @Schema(description = "뉴스 이미지 URL", example = "['https://example.com/image.jpg', 'https://example.com/image2.jpg']", nullable = true)
+    private List<String> imageUrls;
 
-    public NewsResponseDto(Long id, String title, String content, LocalDateTime createdAt, String imageUrl) {
+    public NewsResponseDto(Long id, String title, String content, LocalDateTime createdAt, List<String> imageUrls) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
-        this.imageUrl = imageUrl;
+        this.imageUrls = imageUrls;
     }
 
 }

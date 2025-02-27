@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.news.service;
 
+import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.entity.FileEntity;
 import dmu.dasom.api.global.file.service.FileService;
 import dmu.dasom.api.domain.common.exception.CustomException;
@@ -52,7 +53,7 @@ public class NewsService {
     // 뉴스 생성
     @Transactional
     public NewsResponseDto createNews(NewsRequestDto requestDto) {
-        List<FileEntity> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
+        List<FileResponseDto> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
 
         List<String> base64Images = uploadedFiles.stream()
                 .map(file -> "data:" + file.getFileType() + ";base64," + file.getBase64Data())
@@ -73,7 +74,8 @@ public class NewsService {
         NewsEntity news = newsRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        List<FileEntity> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
+        // fileEntity -> response로 수정
+        List<FileResponseDto> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
 
         List<String> base64Images = uploadedFiles.stream()
                 .map(file -> "data:" + file.getFileType() + ";base64," + file.getBase64Data())

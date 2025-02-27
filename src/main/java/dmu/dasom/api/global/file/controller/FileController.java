@@ -1,5 +1,6 @@
 package dmu.dasom.api.global.file.controller;
 
+import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +16,21 @@ public class FileController {
 
     private final FileService fileService;
 
-    // 파일 업로드
     @PostMapping("/upload")
     public ResponseEntity<List<Long>> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
         List<Long> fileIds = fileService.uploadFiles(files);
         return ResponseEntity.ok(fileIds);
     }
 
-    // 파일 조회
+    // dto 반환으로 수정
     @GetMapping("/{fileId}")
-    public ResponseEntity<String> getFile(@PathVariable Long fileId) {
-        return ResponseEntity.ok(fileService.getFileBase64(fileId));
+    public ResponseEntity<FileResponseDto> getFile(@PathVariable Long fileId) {
+        return ResponseEntity.ok(fileService.getFileById(fileId));
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<FileResponseDto>> getFiles(@RequestParam List<Long> fileIds) {
+        return ResponseEntity.ok(fileService.getFilesByIds(fileIds));
     }
 
 }

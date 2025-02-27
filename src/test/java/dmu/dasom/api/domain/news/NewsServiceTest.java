@@ -37,35 +37,26 @@ class NewsServiceTest {
     private NewsService newsService;
 
     @Test
-    @DisplayName("뉴스 전체 조회 - 성공")
-    void getAllNews_success() {
-        // Given
-        List<String> imageUrls1 = List.of("/path/image1.jpg");
-        List<String> imageUrls2 = List.of("/path/image2.jpg");
-
-        NewsEntity news1 = new NewsEntity(1L, "뉴스1", "내용1", imageUrls1);
-        NewsEntity news2 = new NewsEntity(2L, "뉴스2", "내용2", imageUrls2);
-
-        when(newsRepository.findAll()).thenReturn(List.of(news1, news2));
-
-        // When
-        List<NewsResponseDto> newsList = newsService.getAllNews();
-
-        // Then
-        assertThat(newsList).hasSize(2);
-        assertThat(newsList.get(0).getTitle()).isEqualTo("뉴스1");
-        assertThat(newsList.get(1).getTitle()).isEqualTo("뉴스2");
-
-        verify(newsRepository, times(1)).findAll();
-    }
-
-    @Test
     @DisplayName("뉴스 개별 조회 - 성공")
     void getNewsById_success() {
         // Given
         Long id = 1L;
-        List<String> imageUrls = List.of("/path/image1.jpg");
-        NewsEntity news = new NewsEntity(id, "뉴스1", "내용1", imageUrls);
+        List<FileEntity> images = List.of(
+                FileEntity.builder()
+                        .id(1L)
+                        .originalName("image1.jpg")
+                        .base64Data("base64_encoded_data")
+                        .fileType("image/jpeg")
+                        .fileSize(1024L)
+                        .build()
+        );
+
+        NewsEntity news = NewsEntity.builder()
+                .id(id)
+                .title("뉴스1")
+                .content("내용1")
+                .images(images)
+                .build();
 
         when(newsRepository.findById(id)).thenReturn(Optional.of(news));
 
@@ -92,83 +83,121 @@ class NewsServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
         verify(newsRepository, times(1)).findById(id);
     }
-//
-//    @Test
-//    @DisplayName("뉴스 생성 - 성공")
-//    void createNews_success() {
-//        // Given
-//        List<Long> fileIds = List.of(1L, 2L);
-//        List<FileEntity> fileEntities = List.of(
-//                FileEntity file1 = new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024L);
-//                FileEntity file2 = new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/png", 2048L);
-//
-//        );
-//
-//        List<String> imageUrls = fileEntities.stream()
-//                .map(FileEntity::getFilePath)
-//                .collect(Collectors.toList());
-//
-//        NewsRequestDto requestDto = new NewsRequestDto("새 뉴스", "새 내용", fileIds);
-//
-//        when(fileRepository.findAllById(anyIterable())).thenReturn(fileEntities);
-//        when(newsRepository.save(any(NewsEntity.class)))
-//                .thenAnswer(invocation -> {
-//                    NewsEntity news = invocation.getArgument(0);
-//                    return new NewsEntity(1L, news.getTitle(), news.getContent(), imageUrls);
-//                });
-//
-//        // When
-//        NewsResponseDto responseDto = newsService.createNews(requestDto);
-//
-//        // Then
-//        assertThat(responseDto.getId()).isEqualTo(1L);
-//        assertThat(responseDto.getTitle()).isEqualTo("새 뉴스");
-//        assertThat(responseDto.getContent()).isEqualTo("새 내용");
-//        assertThat(responseDto.getImageUrls()).containsExactly("/path/image1.jpg", "/path/image2.jpg");
-//
-//        verify(newsRepository, times(1)).save(any(NewsEntity.class));
-//    }
 
-//    @Test
-//    @DisplayName("뉴스 수정 - 성공")
-//    void updateNews_success() {
-//        // Given
-//        Long id = 1L;
-//        List<String> oldImageUrls = List.of("/path/old_image.jpg");
-//        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", oldImageUrls);
-//
-//        List<Long> updatedFileIds = List.of(3L, 4L);
-//        List<FileEntity> updatedFiles = List.of(
-//                new FileEntity(3L, "updated_image1.jpg", "stored_updated_image1.jpg", "/path/updated_image1.jpg", "image/jpeg", 1024L),
-//                new FileEntity(4L, "updated_image2.jpg", "stored_updated_image2.jpg", "/path/updated_image2.jpg", "image/jpeg", 2048L)
-//        );
-//
-//        List<String> updatedImageUrls = updatedFiles.stream()
-//                .map(FileEntity::getFilePath)
-//                .collect(Collectors.toList());
-//
-//        NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", updatedFileIds);
-//
-//        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
-//        when(fileRepository.findAllById(updatedFileIds)).thenReturn(updatedFiles);
-//
-//        // When
-//        NewsResponseDto updatedNews = newsService.updateNews(id, updateRequest);
-//
-//        // Then
-//        assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
-//        assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
-//        assertThat(updatedNews.getImageUrls()).containsExactlyElementsOf(updatedImageUrls);
-//
-//        verify(newsRepository, times(1)).findById(id);
-//    }
+    @Test
+    @DisplayName("뉴스 생성 - 성공")
+    void createNews_success() {
+        // Given
+        List<Long> fileIds = List.of(1L, 2L);
+        List<FileEntity> fileEntities = List.of(
+                FileEntity.builder()
+                        .id(1L)
+                        .originalName("image1.jpg")
+                        .base64Data("base64_encoded_data1")
+                        .fileType("image/jpeg")
+                        .fileSize(1024L)
+                        .build(),
+
+                FileEntity.builder()
+                        .id(2L)
+                        .originalName("image2.jpg")
+                        .base64Data("base64_encoded_data2")
+                        .fileType("image/png")
+                        .fileSize(2048L)
+                        .build()
+        );
+
+        NewsRequestDto requestDto = new NewsRequestDto("새 뉴스", "새 내용", fileIds);
+
+        when(fileRepository.findAllById(anyIterable())).thenReturn(fileEntities);
+        when(newsRepository.save(any(NewsEntity.class)))
+                .thenAnswer(invocation -> {
+                    NewsEntity news = invocation.getArgument(0);
+                    return NewsEntity.builder()
+                            .id(1L)
+                            .title(news.getTitle())
+                            .content(news.getContent())
+                            .images(news.getImages())
+                            .build();
+                });
+
+        // When
+        NewsResponseDto responseDto = newsService.createNews(requestDto);
+
+        // Then
+        assertThat(responseDto.getId()).isEqualTo(1L);
+        assertThat(responseDto.getTitle()).isEqualTo("새 뉴스");
+        assertThat(responseDto.getContent()).isEqualTo("새 내용");
+
+        verify(newsRepository, times(1)).save(any(NewsEntity.class));
+    }
+
+    @Test
+    @DisplayName("뉴스 수정 - 성공")
+    void updateNews_success() {
+        // Given
+        Long id = 1L;
+        List<FileEntity> oldImages = List.of(
+                FileEntity.builder()
+                        .id(1L)
+                        .originalName("old_image.jpg")
+                        .base64Data("old_base64_data")
+                        .fileType("image/jpeg")
+                        .fileSize(1024L)
+                        .build()
+        );
+
+        NewsEntity existingNews = NewsEntity.builder()
+                .id(id)
+                .title("기존 뉴스")
+                .content("기존 내용")
+                .images(oldImages)
+                .build();
+
+        List<Long> updatedFileIds = List.of(3L, 4L);
+        List<FileEntity> updatedFiles = List.of(
+                FileEntity.builder()
+                        .id(3L)
+                        .originalName("updated_image1.jpg")
+                        .base64Data("updated_base64_data1")
+                        .fileType("image/jpeg")
+                        .fileSize(1024L)
+                        .build(),
+
+                FileEntity.builder()
+                        .id(4L)
+                        .originalName("updated_image2.jpg")
+                        .base64Data("updated_base64_data2")
+                        .fileType("image/jpeg")
+                        .fileSize(2048L)
+                        .build()
+        );
+
+        NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", updatedFileIds);
+
+        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
+        when(fileRepository.findAllById(updatedFileIds)).thenReturn(updatedFiles);
+
+        // When
+        NewsResponseDto updatedNews = newsService.updateNews(id, updateRequest);
+
+        // Then
+        assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
+        assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
+
+        verify(newsRepository, times(1)).findById(id);
+    }
 
     @Test
     @DisplayName("뉴스 삭제 - 성공")
     void deleteNews_success() {
         // Given
         Long id = 1L;
-        NewsEntity existingNews = new NewsEntity(id, "삭제할 뉴스", "삭제할 내용", List.of());
+        NewsEntity existingNews = NewsEntity.builder()
+                .id(id)
+                .title("삭제할 뉴스")
+                .content("삭제할 내용")
+                .build();
 
         when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
         doNothing().when(newsRepository).delete(existingNews);

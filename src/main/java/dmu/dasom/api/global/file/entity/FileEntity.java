@@ -32,4 +32,12 @@ public class FileEntity {
     @ManyToOne
     @JoinColumn(name = "news_id")
     private NewsEntity news;
+
+    public FileEntity(Long id, String originalName, String base64Data, String fileType, Long fileSize) {
+        this.id = id;
+        this.originalName = originalName;
+        this.base64Data = base64Data;
+        this.fileType = fileType;
+        this.fileSize = fileSize;
+    }
 }

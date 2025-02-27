@@ -35,7 +35,7 @@ public class InterviewServiceImpl implements InterviewService{
     @Override
     @Transactional
     public List<InterviewSlotResponseDto> createInterviewSlots(LocalDate newStartDate, LocalDate newEndDate, LocalTime newStartTime, LocalTime newEndTime) {
-        boolean slotsExist = interviewSlotRepository.exists();
+        boolean slotsExist = interviewSlotRepository.existsAny();
 
         if(slotsExist){
             interviewSlotRepository.deleteAll();

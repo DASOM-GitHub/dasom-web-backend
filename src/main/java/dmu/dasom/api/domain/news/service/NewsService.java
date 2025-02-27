@@ -25,27 +25,43 @@ public class NewsService {
     // 전체 뉴스 조회
     public List<NewsResponseDto> getAllNews() {
         return newsRepository.findAll().stream()
-                .map(NewsEntity::toResponseDto)
+                .map(news -> NewsResponseDto.builder()
+                        .id(news.getId())
+                        .title(news.getTitle())
+                        .content(news.getContent())
+                        .createdAt(news.getCreatedAt())
+                        .imageUrls(news.getImageUrls())
+                        .build())
                 .collect(Collectors.toList());
     }
 
     // 개별 뉴스 조회
     public NewsResponseDto getNewsById(Long id) {
-        return newsRepository.findById(id)
-                .map(NewsEntity::toResponseDto)
+        NewsEntity news = newsRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        return NewsResponseDto.builder()
+                .id(news.getId())
+                .title(news.getTitle())
+                .content(news.getContent())
+                .createdAt(news.getCreatedAt())
+                .imageUrls(news.getImageUrls())
+                .build();
     }
 
     // 뉴스 생성
     @Transactional
     public NewsResponseDto createNews(NewsRequestDto requestDto) {
         List<FileEntity> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
-        List<String> imageUrls = uploadedFiles.stream().map(FileEntity::getFilePath).collect(Collectors.toList());
+
+        List<String> base64Images = uploadedFiles.stream()
+                .map(file -> "data:" + file.getFileType() + ";base64," + file.getBase64Data())
+                .collect(Collectors.toList());
 
         NewsEntity news = NewsEntity.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .imageUrls(imageUrls)
+                .imageUrls(base64Images)
                 .build();
 
         return newsRepository.save(news).toResponseDto();
@@ -58,9 +74,12 @@ public class NewsService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         List<FileEntity> uploadedFiles = fileService.getFilesByIds(requestDto.getFileIds());
-        List<String> imageUrls = uploadedFiles.stream().map(FileEntity::getFilePath).collect(Collectors.toList());
 
-        news.update(requestDto.getTitle(), requestDto.getContent(), imageUrls);
+        List<String> base64Images = uploadedFiles.stream()
+                .map(file -> "data:" + file.getFileType() + ";base64," + file.getBase64Data())
+                .collect(Collectors.toList());
+
+        news.update(requestDto.getTitle(), requestDto.getContent(), base64Images);
 
         return news.toResponseDto();
     }

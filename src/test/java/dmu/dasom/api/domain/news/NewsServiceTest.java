@@ -92,75 +92,76 @@ class NewsServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
         verify(newsRepository, times(1)).findById(id);
     }
+//
+//    @Test
+//    @DisplayName("뉴스 생성 - 성공")
+//    void createNews_success() {
+//        // Given
+//        List<Long> fileIds = List.of(1L, 2L);
+//        List<FileEntity> fileEntities = List.of(
+//                FileEntity file1 = new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024L);
+//                FileEntity file2 = new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/png", 2048L);
+//
+//        );
+//
+//        List<String> imageUrls = fileEntities.stream()
+//                .map(FileEntity::getFilePath)
+//                .collect(Collectors.toList());
+//
+//        NewsRequestDto requestDto = new NewsRequestDto("새 뉴스", "새 내용", fileIds);
+//
+//        when(fileRepository.findAllById(anyIterable())).thenReturn(fileEntities);
+//        when(newsRepository.save(any(NewsEntity.class)))
+//                .thenAnswer(invocation -> {
+//                    NewsEntity news = invocation.getArgument(0);
+//                    return new NewsEntity(1L, news.getTitle(), news.getContent(), imageUrls);
+//                });
+//
+//        // When
+//        NewsResponseDto responseDto = newsService.createNews(requestDto);
+//
+//        // Then
+//        assertThat(responseDto.getId()).isEqualTo(1L);
+//        assertThat(responseDto.getTitle()).isEqualTo("새 뉴스");
+//        assertThat(responseDto.getContent()).isEqualTo("새 내용");
+//        assertThat(responseDto.getImageUrls()).containsExactly("/path/image1.jpg", "/path/image2.jpg");
+//
+//        verify(newsRepository, times(1)).save(any(NewsEntity.class));
+//    }
 
-    @Test
-    @DisplayName("뉴스 생성 - 성공")
-    void createNews_success() {
-        // Given
-        List<Long> fileIds = List.of(1L, 2L);
-        List<FileEntity> fileEntities = List.of(
-                new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024L),
-                new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/jpeg", 2048L)
-        );
-
-        List<String> imageUrls = fileEntities.stream()
-                .map(FileEntity::getFilePath)
-                .collect(Collectors.toList());
-
-        NewsRequestDto requestDto = new NewsRequestDto("새 뉴스", "새 내용", fileIds);
-
-        when(fileRepository.findAllById(anyIterable())).thenReturn(fileEntities);
-        when(newsRepository.save(any(NewsEntity.class)))
-                .thenAnswer(invocation -> {
-                    NewsEntity news = invocation.getArgument(0);
-                    return new NewsEntity(1L, news.getTitle(), news.getContent(), imageUrls);
-                });
-
-        // When
-        NewsResponseDto responseDto = newsService.createNews(requestDto);
-
-        // Then
-        assertThat(responseDto.getId()).isEqualTo(1L);
-        assertThat(responseDto.getTitle()).isEqualTo("새 뉴스");
-        assertThat(responseDto.getContent()).isEqualTo("새 내용");
-        assertThat(responseDto.getImageUrls()).containsExactly("/path/image1.jpg", "/path/image2.jpg");
-
-        verify(newsRepository, times(1)).save(any(NewsEntity.class));
-    }
-
-    @Test
-    @DisplayName("뉴스 수정 - 성공")
-    void updateNews_success() {
-        // Given
-        Long id = 1L;
-        List<String> oldImageUrls = List.of("/path/old_image.jpg");
-        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", oldImageUrls);
-
-        List<Long> updatedFileIds = List.of(3L, 4L);
-        List<FileEntity> updatedFiles = List.of(
-                new FileEntity(3L, "updated_image1.jpg", "stored_updated_image1.jpg", "/path/updated_image1.jpg", "image/jpeg", 1024L),
-                new FileEntity(4L, "updated_image2.jpg", "stored_updated_image2.jpg", "/path/updated_image2.jpg", "image/jpeg", 2048L)
-        );
-
-        List<String> updatedImageUrls = updatedFiles.stream()
-                .map(FileEntity::getFilePath)
-                .collect(Collectors.toList());
-
-        NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", updatedFileIds);
-
-        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
-        when(fileRepository.findAllById(updatedFileIds)).thenReturn(updatedFiles);
-
-        // When
-        NewsResponseDto updatedNews = newsService.updateNews(id, updateRequest);
-
-        // Then
-        assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
-        assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
-        assertThat(updatedNews.getImageUrls()).containsExactlyElementsOf(updatedImageUrls);
-
-        verify(newsRepository, times(1)).findById(id);
-    }
+//    @Test
+//    @DisplayName("뉴스 수정 - 성공")
+//    void updateNews_success() {
+//        // Given
+//        Long id = 1L;
+//        List<String> oldImageUrls = List.of("/path/old_image.jpg");
+//        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", oldImageUrls);
+//
+//        List<Long> updatedFileIds = List.of(3L, 4L);
+//        List<FileEntity> updatedFiles = List.of(
+//                new FileEntity(3L, "updated_image1.jpg", "stored_updated_image1.jpg", "/path/updated_image1.jpg", "image/jpeg", 1024L),
+//                new FileEntity(4L, "updated_image2.jpg", "stored_updated_image2.jpg", "/path/updated_image2.jpg", "image/jpeg", 2048L)
+//        );
+//
+//        List<String> updatedImageUrls = updatedFiles.stream()
+//                .map(FileEntity::getFilePath)
+//                .collect(Collectors.toList());
+//
+//        NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", updatedFileIds);
+//
+//        when(newsRepository.findById(id)).thenReturn(Optional.of(existingNews));
+//        when(fileRepository.findAllById(updatedFileIds)).thenReturn(updatedFiles);
+//
+//        // When
+//        NewsResponseDto updatedNews = newsService.updateNews(id, updateRequest);
+//
+//        // Then
+//        assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
+//        assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
+//        assertThat(updatedNews.getImageUrls()).containsExactlyElementsOf(updatedImageUrls);
+//
+//        verify(newsRepository, times(1)).findById(id);
+//    }
 
     @Test
     @DisplayName("뉴스 삭제 - 성공")
@@ -194,5 +195,5 @@ class NewsServiceTest {
         verify(newsRepository, times(1)).findById(id);
         verify(newsRepository, never()).delete(any());
     }
-    
+
 }

@@ -30,7 +30,7 @@ public class NewsEntity extends BaseEntity {
 
     @ElementCollection
     @CollectionTable(name = "news_images", joinColumns = @JoinColumn(name = "news_id"))
-    @Column(name = "image_url", length = 255)
+    @Column(name = "image_data", columnDefinition = "TEXT")
     private List<String> imageUrls;
 
     public void update(String title, String content, List<String> imageUrls) {
@@ -42,4 +42,5 @@ public class NewsEntity extends BaseEntity {
     public NewsResponseDto toResponseDto() {
         return new NewsResponseDto(id, title, content, getCreatedAt(), imageUrls);
     }
+
 }

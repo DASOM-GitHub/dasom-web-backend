@@ -27,4 +27,5 @@ public class NewsRequestDto {
 
     @Schema(description = "이미지 파일 ID 목록", example = "[1, 2, 3]", nullable = true)
     private List<Long> fileIds;
+
 }

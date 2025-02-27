@@ -25,8 +25,6 @@ public class NewsRequestDto {
     @Schema(description = "뉴스 내용", example = "새로운 뉴스 내용")
     private String content;
 
-    @Size(max = 255, message = "이미지 URL은 최대 255자입니다.")
-    @Schema(description = "뉴스 이미지 URL", example = "http://example.com/image.jpg", nullable = true)
-    private List<MultipartFile> images;
-
+    @Schema(description = "이미지 파일 ID 목록", example = "[1, 2, 3]", nullable = true)
+    private List<Long> fileIds;
 }

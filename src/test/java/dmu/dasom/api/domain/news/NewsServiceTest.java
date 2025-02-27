@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,8 +40,11 @@ class NewsServiceTest {
     @DisplayName("뉴스 전체 조회 - 성공")
     void getAllNews_success() {
         // Given
-        NewsEntity news1 = new NewsEntity(1L, "뉴스1", "내용1", List.of(new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024)));
-        NewsEntity news2 = new NewsEntity(2L, "뉴스2", "내용2", List.of(new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/jpeg", 2048)));
+        List<String> imageUrls1 = List.of("/path/image1.jpg");
+        List<String> imageUrls2 = List.of("/path/image2.jpg");
+
+        NewsEntity news1 = new NewsEntity(1L, "뉴스1", "내용1", imageUrls1);
+        NewsEntity news2 = new NewsEntity(2L, "뉴스2", "내용2", imageUrls2);
 
         when(newsRepository.findAll()).thenReturn(List.of(news1, news2));
 
@@ -60,7 +64,8 @@ class NewsServiceTest {
     void getNewsById_success() {
         // Given
         Long id = 1L;
-        NewsEntity news = new NewsEntity(id, "뉴스1", "내용1", List.of(new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024)));
+        List<String> imageUrls = List.of("/path/image1.jpg");
+        NewsEntity news = new NewsEntity(id, "뉴스1", "내용1", imageUrls);
 
         when(newsRepository.findById(id)).thenReturn(Optional.of(news));
 
@@ -82,9 +87,7 @@ class NewsServiceTest {
         when(newsRepository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            newsService.getNewsById(id);
-        });
+        CustomException exception = assertThrows(CustomException.class, () -> newsService.getNewsById(id));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
         verify(newsRepository, times(1)).findById(id);
@@ -95,11 +98,14 @@ class NewsServiceTest {
     void createNews_success() {
         // Given
         List<Long> fileIds = List.of(1L, 2L);
-
         List<FileEntity> fileEntities = List.of(
-                new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024),
-                new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/jpeg", 2048)
+                new FileEntity(1L, "image1.jpg", "stored_image1.jpg", "/path/image1.jpg", "image/jpeg", 1024L),
+                new FileEntity(2L, "image2.jpg", "stored_image2.jpg", "/path/image2.jpg", "image/jpeg", 2048L)
         );
+
+        List<String> imageUrls = fileEntities.stream()
+                .map(FileEntity::getFilePath)
+                .collect(Collectors.toList());
 
         NewsRequestDto requestDto = new NewsRequestDto("새 뉴스", "새 내용", fileIds);
 
@@ -107,7 +113,7 @@ class NewsServiceTest {
         when(newsRepository.save(any(NewsEntity.class)))
                 .thenAnswer(invocation -> {
                     NewsEntity news = invocation.getArgument(0);
-                    return new NewsEntity(1L, news.getTitle(), news.getContent(), news.getImages());
+                    return new NewsEntity(1L, news.getTitle(), news.getContent(), imageUrls);
                 });
 
         // When
@@ -127,13 +133,18 @@ class NewsServiceTest {
     void updateNews_success() {
         // Given
         Long id = 1L;
-        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", List.of());
+        List<String> oldImageUrls = List.of("/path/old_image.jpg");
+        NewsEntity existingNews = new NewsEntity(id, "기존 뉴스", "기존 내용", oldImageUrls);
 
         List<Long> updatedFileIds = List.of(3L, 4L);
         List<FileEntity> updatedFiles = List.of(
-                new FileEntity(3L, "updated_image1.jpg", "stored_updated_image1.jpg", "/path/updated_image1.jpg", "image/jpeg", 1024),
-                new FileEntity(4L, "updated_image2.jpg", "stored_updated_image2.jpg", "/path/updated_image2.jpg", "image/jpeg", 2048)
+                new FileEntity(3L, "updated_image1.jpg", "stored_updated_image1.jpg", "/path/updated_image1.jpg", "image/jpeg", 1024L),
+                new FileEntity(4L, "updated_image2.jpg", "stored_updated_image2.jpg", "/path/updated_image2.jpg", "image/jpeg", 2048L)
         );
+
+        List<String> updatedImageUrls = updatedFiles.stream()
+                .map(FileEntity::getFilePath)
+                .collect(Collectors.toList());
 
         NewsRequestDto updateRequest = new NewsRequestDto("수정된 뉴스", "수정된 내용", updatedFileIds);
 
@@ -146,7 +157,7 @@ class NewsServiceTest {
         // Then
         assertThat(updatedNews.getTitle()).isEqualTo("수정된 뉴스");
         assertThat(updatedNews.getContent()).isEqualTo("수정된 내용");
-        assertThat(updatedNews.getImageUrls()).containsExactly("/path/updated_image1.jpg", "/path/updated_image2.jpg");
+        assertThat(updatedNews.getImageUrls()).containsExactlyElementsOf(updatedImageUrls);
 
         verify(newsRepository, times(1)).findById(id);
     }
@@ -177,12 +188,11 @@ class NewsServiceTest {
         when(newsRepository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            newsService.deleteNews(id);
-        });
+        CustomException exception = assertThrows(CustomException.class, () -> newsService.deleteNews(id));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
         verify(newsRepository, times(1)).findById(id);
         verify(newsRepository, never()).delete(any());
     }
+    
 }

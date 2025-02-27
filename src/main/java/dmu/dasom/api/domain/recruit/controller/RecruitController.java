@@ -3,6 +3,9 @@ package dmu.dasom.api.domain.recruit.controller;
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
+import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
+import dmu.dasom.api.domain.interview.service.InterviewService;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitConfigResponseDto;
@@ -18,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -27,6 +32,7 @@ public class RecruitController {
 
     private final ApplicantService applicantService;
     private final RecruitService recruitService;
+    private final InterviewService interviewService;
 
     // 지원하기
     @Operation(summary = "부원 지원하기")
@@ -75,5 +81,36 @@ public class RecruitController {
     public ResponseEntity<ResultCheckResponseDto> checkResult(@ModelAttribute final ResultCheckRequestDto request) {
         return ResponseEntity.ok(recruitService.checkResult(request));
     }
+
+    // 면접 일정 생성
+    @Operation(summary = "면접 일정 생성", description = "새로운 면접 일정을 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "면접 일정 생성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    @PostMapping("/interview/schedule")
+    public ResponseEntity<List<InterviewSlotResponseDto>> createInterviewSlots(
+            @RequestParam("startDate") LocalDate startDate,
+            @RequestParam("endDate") LocalDate endDate,
+            @RequestParam("startTime") LocalTime startTime,
+            @RequestParam("endTime") LocalTime endTime) {
+
+        List<InterviewSlotResponseDto> slots =
+                interviewService.createInterviewSlots(startDate, endDate, startTime, endTime);
+        return ResponseEntity.ok(slots);
+    }
+
+    // 면접 예약
+    @Operation(summary = "면접 예약", description = "지원자가 특정 면접 슬롯을 예약합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "면접 예약 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+    })
+    @PostMapping("/interview/reserve")
+    public ResponseEntity<Void> reserveInterviewSlot(@Valid @RequestBody InterviewReservationRequestDto request) {
+        interviewService.reserveInterviewSlot(request);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

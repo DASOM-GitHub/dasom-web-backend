@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -87,6 +88,26 @@ public class RecruitServiceImpl implements RecruitService {
                 applicant.getStatus()
                     .equals(ApplicantStatus.INTERVIEW_PASSED))
             .build();
+    }
+
+    @Override
+    public LocalDate getInterviewStartDate() {
+        return LocalDate.parse(findByKey(ConfigKey.INTERVIEW_PERIOD_START).getValue());
+    }
+
+    @Override
+    public LocalDate getInterviewEndDate() {
+        return LocalDate.parse(findByKey(ConfigKey.INTERVIEW_PERIOD_END).getValue());
+    }
+
+    @Override
+    public LocalTime getInterviewStartTime() {
+        return LocalTime.parse(findByKey(ConfigKey.INTERVIEW_TIME_START).getValue());
+    }
+
+    @Override
+    public LocalTime getInterviewEndTime() {
+        return LocalTime.parse(findByKey(ConfigKey.INTERVIEW_TIME_END).getValue());
     }
 
     // DB에 저장된 모든 Recruit 객체를 찾아 반환

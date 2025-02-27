@@ -5,6 +5,9 @@ import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.service.ApplicantServiceImpl;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
+import dmu.dasom.api.domain.interview.service.InterviewServiceImpl;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitConfigResponseDto;
@@ -21,7 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +43,9 @@ class RecruitServiceTest {
 
     @Mock
     private ApplicantServiceImpl applicantService;
+
+    @Mock
+    private InterviewServiceImpl interviewService;
 
     @InjectMocks
     private RecruitServiceImpl recruitService;
@@ -178,5 +186,100 @@ class RecruitServiceTest {
         verify(recruitRepository, times(1)).findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
         verify(applicantService, times(1)).getApplicantByStudentNo("20210000");
     }
+
+    @Test
+    @DisplayName("면접 일정 생성 - 성공")
+    void createInterviewSlots_success() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 3, 12);
+        LocalDate endDate = LocalDate.of(2025, 3, 14);
+        LocalTime startTime = LocalTime.of(14, 0);
+        LocalTime endTime = LocalTime.of(20, 0);
+
+        InterviewSlotResponseDto slot1 = mock(InterviewSlotResponseDto.class);
+        InterviewSlotResponseDto slot2 = mock(InterviewSlotResponseDto.class);
+
+        when(interviewService.createInterviewSlots(startDate, endDate, startTime, endTime))
+                .thenReturn(List.of(slot1, slot2));
+
+        // when
+        List<InterviewSlotResponseDto> slots = interviewService.createInterviewSlots(startDate, endDate, startTime, endTime);
+
+        // then
+        assertNotNull(slots);
+        assertEquals(2, slots.size());
+        verify(interviewService, times(1)).createInterviewSlots(startDate, endDate, startTime, endTime);
+    }
+
+    @Test
+    @DisplayName("면접 예약 - 성공")
+    void reserveInterviewSlot_success() {
+        // given
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+
+        // when
+        interviewService.reserveInterviewSlot(request);
+
+        // then
+        verify(interviewService, times(1)).reserveInterviewSlot(request);
+    }
+
+
+    @Test
+    @DisplayName("면접 예약 - 실패 (슬롯 없음)")
+    void reserveInterviewSlot_fail_slotNotFound() {
+        // given
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+
+        doThrow(new CustomException(ErrorCode.SLOT_NOT_FOUND))
+                .when(interviewService).reserveInterviewSlot(request);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            interviewService.reserveInterviewSlot(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.SLOT_NOT_FOUND, exception.getErrorCode());
+    }
+
+
+    @Test
+    @DisplayName("면접 예약 - 실패 (최대 지원자 수 초과)")
+    void reserveInterviewSlot_fail_slotFull() {
+        // given
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+
+        doThrow(new CustomException(ErrorCode.SLOT_FULL))
+                .when(interviewService).reserveInterviewSlot(request);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            interviewService.reserveInterviewSlot(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.SLOT_FULL, exception.getErrorCode());
+    }
+
+
+    @Test
+    @DisplayName("면접 예약 - 실패 (이미 예약됨)")
+    void reserveInterviewSlot_fail_alreadyReserved() {
+        // given
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+
+        doThrow(new CustomException(ErrorCode.ALREADY_RESERVED))
+                .when(interviewService).reserveInterviewSlot(request);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            interviewService.reserveInterviewSlot(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.ALREADY_RESERVED, exception.getErrorCode());
+    }
+
 
 }

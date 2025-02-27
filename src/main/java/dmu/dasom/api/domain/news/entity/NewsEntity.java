@@ -2,10 +2,12 @@ package dmu.dasom.api.domain.news.entity;
 
 import dmu.dasom.api.domain.common.BaseEntity;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
+import dmu.dasom.api.global.file.entity.FileEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -42,5 +44,8 @@ public class NewsEntity extends BaseEntity {
     public NewsResponseDto toResponseDto() {
         return new NewsResponseDto(id, title, content, getCreatedAt(), imageUrls);
     }
+
+    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileEntity> images = new ArrayList<>();
 
 }

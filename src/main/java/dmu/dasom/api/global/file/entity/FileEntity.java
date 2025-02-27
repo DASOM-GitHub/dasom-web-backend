@@ -1,5 +1,6 @@
 package dmu.dasom.api.global.file.entity;
 
+import dmu.dasom.api.domain.news.entity.NewsEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +29,7 @@ public class FileEntity {
     @Column(nullable = false)
     private Long fileSize;
 
+    @ManyToOne
+    @JoinColumn(name = "news_id")
+    private NewsEntity news;
 }

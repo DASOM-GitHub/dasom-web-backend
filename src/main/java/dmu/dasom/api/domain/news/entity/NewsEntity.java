@@ -2,12 +2,12 @@ package dmu.dasom.api.domain.news.entity;
 
 import dmu.dasom.api.domain.common.BaseEntity;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
-import dmu.dasom.api.global.file.entity.FileEntity;
+import dmu.dasom.api.global.file.dto.FileResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,22 +30,29 @@ public class NewsEntity extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @ElementCollection
-    @CollectionTable(name = "news_images", joinColumns = @JoinColumn(name = "news_id"))
-    @Column(name = "image_data", columnDefinition = "TEXT")
-    private List<String> imageUrls;
-
-    public void update(String title, String content, List<String> imageUrls) {
+    public void update(String title, String content) {
         this.title = title;
         this.content = content;
-        this.imageUrls = imageUrls;
+    }
+
+    public NewsResponseDto toResponseDto(List<FileResponseDto> images) {
+        return NewsResponseDto.builder()
+            .id(this.id)
+            .title(this.title)
+            .content(this.content)
+            .createdAt(getCreatedAt())
+            .images(ObjectUtils.isEmpty(images) ? null : images)
+            .build();
     }
 
     public NewsResponseDto toResponseDto() {
-        return new NewsResponseDto(id, title, content, getCreatedAt(), imageUrls);
+        return NewsResponseDto.builder()
+            .id(this.id)
+            .title(this.title)
+            .content(this.content)
+            .createdAt(getCreatedAt())
+            .images(null)
+            .build();
     }
-
-    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FileEntity> images = new ArrayList<>();
 
 }

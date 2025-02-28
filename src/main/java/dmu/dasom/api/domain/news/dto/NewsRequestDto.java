@@ -1,14 +1,12 @@
 package dmu.dasom.api.domain.news.dto;
 
+import dmu.dasom.api.domain.news.entity.NewsEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -25,7 +23,11 @@ public class NewsRequestDto {
     @Schema(description = "뉴스 내용", example = "새로운 뉴스 내용")
     private String content;
 
-    @Schema(description = "이미지 파일 ID 목록", example = "[1, 2, 3]", nullable = true)
-    private List<Long> fileIds;
+    public NewsEntity toEntity() {
+        return NewsEntity.builder()
+            .title(this.title)
+            .content(this.content)
+            .build();
+    }
 
 }

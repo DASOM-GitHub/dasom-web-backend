@@ -1,9 +1,13 @@
 package dmu.dasom.api.global.file.service;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.entity.FileEntity;
+import dmu.dasom.api.global.file.enums.FileType;
 import dmu.dasom.api.global.file.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,51 +22,57 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-    public List<Long> uploadFiles(List<MultipartFile> files) {
-        List<FileEntity> savedFiles = files.stream().map(file -> {
-            try {
-                byte[] bytes = file.getBytes();
-                String base64Encoded = Base64.getEncoder().encodeToString(bytes);
-                return FileEntity.builder()
-                        .originalName(file.getOriginalFilename())
-                        .base64Data(base64Encoded)
-                        .fileType(file.getContentType())
-                        .fileSize(file.getSize())
-                        .build();
-            } catch (IOException e) {
-                throw new RuntimeException("파일 인코딩 실패", e);
-            }
-        }).collect(Collectors.toList());
+    // 파일 업로드
+    public void uploadFiles(List<MultipartFile> files, FileType fileType, Long targetId) {
+        List<FileEntity> filesToEntity = files.stream()
+            .map(file -> FileEntity.builder()
+                .originalName(file.getOriginalFilename())
+                .encodedData(encode(file))
+                .fileFormat(file.getContentType())
+                .fileSize(file.getSize())
+                .fileType(fileType)
+                .targetId(targetId)
+                .build())
+            .toList();
 
-        return fileRepository.saveAll(savedFiles)
-                .stream()
-                .map(FileEntity::getId)
-                .collect(Collectors.toList());
+        fileRepository.saveAllAndFlush(filesToEntity);
     }
 
-    // 파일 하나 조회
+    // 단일 파일 조회
     public FileResponseDto getFileById(Long fileId) {
         FileEntity file = fileRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("파일을 찾을 수 없음"));
+            .orElseThrow(() -> new CustomException(ErrorCode.EMPTY_RESULT));
 
-        return convertToDto(file);
+        return file.toResponseDto();
     }
 
-    // 파일 여러개 조회
-    public List<FileResponseDto> getFilesByIds(List<Long> fileIds) {
-        List<FileEntity> files = fileRepository.findAllById(fileIds);
-        return files.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    // 파일 타입과 타겟 아이디로 파일 목록 조회
+    public List<FileResponseDto> getFilesByTypeAndTargetId(FileType fileType, Long targetId) {
+        return findByFileTypeAndTargetId(fileType, targetId)
+            .stream()
+            .map(FileEntity::toResponseDto)
+            .toList();
     }
 
-    // FileEntity → FileResponseDto 변환용
-    private FileResponseDto convertToDto(FileEntity file) {
-        return FileResponseDto.builder()
-                .id(file.getId())
-                .fileType(file.getFileType())
-                .base64Data("data:" + file.getFileType() + ";base64," + file.getBase64Data())
-                .build();
+    public void deleteFilesByTypeAndTargetId(FileType fileType, Long targetId) {
+        List<FileEntity> files = findByFileTypeAndTargetId(fileType, targetId);
+
+        if (ObjectUtils.isNotEmpty(files))
+            fileRepository.deleteAll(files);
+    }
+
+    private List<FileEntity> findByFileTypeAndTargetId(FileType fileType, Long targetId) {
+        return fileRepository.findByFileTypeAndTargetId(fileType, targetId);
+    }
+
+    private String encode(MultipartFile file) {
+        try {
+            byte[] bytes = file.getBytes();
+            return Base64.getEncoder()
+                .encodeToString(bytes);
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.FILE_ENCODE_FAIL);
+        }
     }
 
 }

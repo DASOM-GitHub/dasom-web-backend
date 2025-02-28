@@ -1,6 +1,7 @@
 package dmu.dasom.api.global.file.entity;
 
-import dmu.dasom.api.domain.news.entity.NewsEntity;
+import dmu.dasom.api.global.file.dto.FileResponseDto;
+import dmu.dasom.api.global.file.enums.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,28 +17,32 @@ public class FileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "ORIGINAL_FILE_NAME", nullable = false)
     private String originalName;
 
     @Lob
-    @Column(name = "base64data", nullable = false, columnDefinition = "CLOB")
-    private String base64Data;
+    @Column(name = "ENCODED_DATA", nullable = false, columnDefinition = "CLOB")
+    private String encodedData;
 
-    @Column(nullable = false)
-    private String fileType;
+    @Column(name = "FILE_FORMAT", nullable = false)
+    private String fileFormat;
 
-    @Column(nullable = false)
+    @Column(name = "FILE_SIZE", nullable = false)
     private Long fileSize;
 
-    @ManyToOne
-    @JoinColumn(name = "news_id")
-    private NewsEntity news;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "FILE_TYPE", nullable = false)
+    private FileType fileType;
 
-    public FileEntity(Long id, String originalName, String base64Data, String fileType, Long fileSize) {
-        this.id = id;
-        this.originalName = originalName;
-        this.base64Data = base64Data;
-        this.fileType = fileType;
-        this.fileSize = fileSize;
+    @Column(name = "TARGET_ID", nullable = false)
+    private Long targetId;
+
+    public FileResponseDto toResponseDto() {
+        return FileResponseDto.builder()
+            .id(id)
+            .fileFormat(fileFormat)
+            .encodedData(encodedData)
+            .build();
     }
+
 }

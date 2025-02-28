@@ -11,10 +11,12 @@ import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
+import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,10 @@ public class ApplicantServiceImpl implements ApplicantService {
 
     private final ApplicantRepository applicantRepository;
     private final EmailService emailService;
+    private final GoogleApiService googleApiService;
+
+    @Value("${google.spreadsheet.id}")
+    private String spreadSheetId;
 
     // 지원자 저장
     @Override
@@ -46,13 +52,15 @@ public class ApplicantServiceImpl implements ApplicantService {
             if (!request.getIsOverwriteConfirmed())
                 throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
 
-            // 기존 지원자 정보 갱신 수행
-            applicant.get().overwrite(request);
+            Applicant existingApplicant = applicant.get();
+            existingApplicant.overwrite(request);
+
+            googleApiService.updateSheet(List.of(existingApplicant));
             return;
         }
 
-        // 새로운 지원자일 경우 저장
-        applicantRepository.save(request.toEntity());
+        Applicant savedApplicant = applicantRepository.save(request.toEntity());
+        googleApiService.appendToSheet(List.of(savedApplicant));
     }
 
     // 지원자 조회
@@ -77,7 +85,20 @@ public class ApplicantServiceImpl implements ApplicantService {
     @Override
     public ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request) {
         final Applicant applicant = findById(id);
+        // 지원자 상태 변경
         applicant.updateStatus(request.getStatus());
+
+        // Google Sheets에서 학번(Student No)을 기준으로 사용자 존재 여부 확인
+        int rowIndex = googleApiService.findRowIndexByStudentNo(spreadSheetId, "Sheet1", applicant.getStudentNo());
+        if (rowIndex == -1) {
+            // Google Sheets에 사용자 추가
+            googleApiService.appendToSheet(List.of(applicant));
+            log.info("지원자가 Google Sheets에 없어서 새로 추가되었습니다: {}", applicant.getStudentNo());
+        } else {
+            // Google Sheets에서 사용자 상태 업데이트
+            googleApiService.updateSheet(List.of(applicant));
+            log.info("Google Sheets에서 지원자 상태가 업데이트되었습니다: {}", applicant.getStudentNo());
+        }
 
         return applicant.toApplicantDetailsResponse();
     }

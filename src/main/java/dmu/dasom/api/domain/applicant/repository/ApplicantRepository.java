@@ -8,14 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-
 import java.util.Optional;
 
 public interface ApplicantRepository extends JpaRepository<Applicant, Long> {
 
     @Query("SELECT a FROM Applicant a ORDER BY a.id DESC")
     Page<Applicant> findAllWithPageRequest(final Pageable pageable);
-
     // 상태별 지원자 조회
     List<Applicant> findByStatus(ApplicantStatus status);
     List<Applicant> findByStatusIn(List<ApplicantStatus> statuses);

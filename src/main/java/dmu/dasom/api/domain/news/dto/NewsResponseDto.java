@@ -29,7 +29,7 @@ public class NewsResponseDto {
     @Schema(description = "작성일", example = "2025-02-14T12:00:00")
     private LocalDateTime createdAt;
 
-    @Schema(description = "인코딩된 이미지", example = "asdf", nullable = true)
+    @Schema(description = "인코딩된 이미지", nullable = true)
     private List<FileResponseDto> images;
 
 }

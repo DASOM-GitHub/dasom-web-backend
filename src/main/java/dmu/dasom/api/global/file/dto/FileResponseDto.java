@@ -19,7 +19,7 @@ public class FileResponseDto {
     @NotNull
     private String fileFormat;
 
-    @Schema(description = "인코딩 된 파일", example = "asdf")
+    @Schema(description = "인코딩 된 파일", example = "base64encoded")
     @NotNull
     private String encodedData;   // Base64 인코딩 데이터
 

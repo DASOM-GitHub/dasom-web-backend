@@ -4,6 +4,8 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewSlotCreateRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewSlotRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 import dmu.dasom.api.domain.interview.service.InterviewService;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
@@ -89,14 +91,10 @@ public class RecruitController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     @PostMapping("/interview/schedule")
-    public ResponseEntity<List<InterviewSlotResponseDto>> createInterviewSlots(
-            @RequestParam("startDate") LocalDate startDate,
-            @RequestParam("endDate") LocalDate endDate,
-            @RequestParam("startTime") LocalTime startTime,
-            @RequestParam("endTime") LocalTime endTime) {
+    public ResponseEntity<List<InterviewSlotResponseDto>> createInterviewSlots(@Valid @RequestBody InterviewSlotCreateRequestDto request) {
 
         List<InterviewSlotResponseDto> slots =
-                interviewService.createInterviewSlots(startDate, endDate, startTime, endTime);
+                interviewService.createInterviewSlots(request.getStartDate(), request.getEndDate(), request.getStartTime(), request.getEndTime());
         return ResponseEntity.ok(slots);
     }
 

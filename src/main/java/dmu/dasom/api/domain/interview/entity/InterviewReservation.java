@@ -24,6 +24,6 @@ public class InterviewReservation {
     @JoinColumn(name = "applicant_id", nullable = false)
     private Applicant applicant; // 지원자
 
-    @Column(nullable = false, unique = true, length = 8)
-    private String reservationCode; // 학번 뒤 4자리 + 전화번호 뒤 4자리 조합 코드
+    @Column(nullable = false, unique = true, length = 12)
+    private String reservationCode; // 학번 전체 + 전화번호 뒤 4자리 조합 코드
 }

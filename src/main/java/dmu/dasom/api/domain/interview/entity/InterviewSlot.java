@@ -1,6 +1,6 @@
 package dmu.dasom.api.domain.interview.entity;
 
-import dmu.dasom.api.domain.interview.enums.Status;
+import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,19 +35,19 @@ public class InterviewSlot {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private Status status; // 면접 슬롯 상태 (ACTIVE, INACTIVE, CLOSED)
+    private InterviewStatus interviewStatus; // 면접 슬롯 상태 (ACTIVE, INACTIVE, CLOSED)
 
     public void incrementCurrentCandidates() {
         this.currentCandidates++;
         if (this.currentCandidates >= this.maxCandidates) {
-            this.status = Status.CLOSED; // 최대 지원자 수에 도달하면 상태 변경
+            this.interviewStatus = InterviewStatus.CLOSED; // 최대 지원자 수에 도달하면 상태 변경
         }
     }
 
     public void decrementCurrentCandidates() {
         this.currentCandidates--;
-        if (status == Status.CLOSED && this.currentCandidates < this.maxCandidates) {
-            this.status = Status.ACTIVE; // 지원자 수가 줄어들면 다시 활성화
+        if (interviewStatus == InterviewStatus.CLOSED && this.currentCandidates < this.maxCandidates) {
+            this.interviewStatus = InterviewStatus.ACTIVE; // 지원자 수가 줄어들면 다시 활성화
         }
     }
 

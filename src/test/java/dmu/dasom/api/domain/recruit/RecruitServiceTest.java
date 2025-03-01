@@ -215,7 +215,7 @@ class RecruitServiceTest {
     @DisplayName("면접 예약 - 성공")
     void reserveInterviewSlot_success() {
         // given
-        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1234L, "202500010542");
 
         // when
         interviewService.reserveInterviewSlot(request);
@@ -229,7 +229,7 @@ class RecruitServiceTest {
     @DisplayName("면접 예약 - 실패 (슬롯 없음)")
     void reserveInterviewSlot_fail_slotNotFound() {
         // given
-        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1234L, "00006789");
 
         doThrow(new CustomException(ErrorCode.SLOT_NOT_FOUND))
                 .when(interviewService).reserveInterviewSlot(request);
@@ -248,7 +248,7 @@ class RecruitServiceTest {
     @DisplayName("면접 예약 - 실패 (최대 지원자 수 초과)")
     void reserveInterviewSlot_fail_slotFull() {
         // given
-        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1234L, "00006789");
 
         doThrow(new CustomException(ErrorCode.SLOT_FULL))
                 .when(interviewService).reserveInterviewSlot(request);
@@ -267,7 +267,7 @@ class RecruitServiceTest {
     @DisplayName("면접 예약 - 실패 (이미 예약됨)")
     void reserveInterviewSlot_fail_alreadyReserved() {
         // given
-        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1L, 1234L, "00006789");
+        InterviewReservationRequestDto request = new InterviewReservationRequestDto(1234L, "00006789");
 
         doThrow(new CustomException(ErrorCode.ALREADY_RESERVED))
                 .when(interviewService).reserveInterviewSlot(request);
@@ -280,6 +280,5 @@ class RecruitServiceTest {
         // then
         assertEquals(ErrorCode.ALREADY_RESERVED, exception.getErrorCode());
     }
-
 
 }

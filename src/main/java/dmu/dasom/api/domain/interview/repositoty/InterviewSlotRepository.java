@@ -1,7 +1,7 @@
 package dmu.dasom.api.domain.interview.repositoty;
 
 import dmu.dasom.api.domain.interview.entity.InterviewSlot;
-import dmu.dasom.api.domain.interview.enums.Status;
+import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,8 +17,8 @@ public interface InterviewSlotRepository extends JpaRepository<InterviewSlot, Lo
     Collection<InterviewSlot> findAllByCurrentCandidatesLessThanMaxCandidates();
 
     // 상태에 따른 슬롯 조회
-    @Query("SELECT s FROM InterviewSlot s WHERE s.status = :status AND s.currentCandidates < s.maxCandidates")
-    List<InterviewSlot> findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(Status status);
+    @Query("SELECT s FROM InterviewSlot s WHERE s.interviewStatus = :status AND s.currentCandidates < s.maxCandidates")
+    List<InterviewSlot> findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(InterviewStatus interviewStatus);
 
     // 슬롯이 하나라도 존재하는지 확인
     @Query("SELECT COUNT(s) > 0 FROM InterviewSlot s")

@@ -8,7 +8,7 @@ import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 import dmu.dasom.api.domain.interview.entity.InterviewReservation;
 import dmu.dasom.api.domain.interview.entity.InterviewSlot;
-import dmu.dasom.api.domain.interview.enums.Status;
+import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import dmu.dasom.api.domain.interview.repositoty.InterviewReservationRepository;
 import dmu.dasom.api.domain.interview.repositoty.InterviewSlotRepository;
 import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
@@ -53,7 +53,7 @@ public class InterviewServiceImpl implements InterviewService{
                         .endTime(slotEndTime)
                         .maxCandidates(2)
                         .currentCandidates(0)
-                        .status(Status.ACTIVE)
+                        .interviewStatus(InterviewStatus.ACTIVE)
                         .build();
 
                 interviewSlotRepository.save(slot);
@@ -68,7 +68,7 @@ public class InterviewServiceImpl implements InterviewService{
     // 예약 가능한 면접 슬롯 조회
     @Override
     public List<InterviewSlotResponseDto> getAvailableSlots() {
-        return interviewSlotRepository.findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(Status.ACTIVE)
+        return interviewSlotRepository.findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(InterviewStatus.ACTIVE)
                 .stream()
                 .map(InterviewSlotResponseDto::new)
                 .toList();
@@ -77,35 +77,39 @@ public class InterviewServiceImpl implements InterviewService{
     @Override
     @Transactional
     public void reserveInterviewSlot(InterviewReservationRequestDto request) {
+
+        // 예약 코드에서 학번과 전화번호 뒷자리 추출
+        String reservationCode = request.getReservationCode();
+        String studentNo = reservationCode.substring(0, 8);
+        String contactLastDigits = reservationCode.substring(8);
+
+        // 지원자 조회 및 검증
+        Applicant applicant = applicantRepository.findByStudentNoAndContactEndsWith(studentNo, contactLastDigits)
+                .orElseThrow(() -> new CustomException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        // 면접 슬롯 조회 및 검증
         InterviewSlot slot = interviewSlotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new CustomException(ErrorCode.SLOT_NOT_FOUND));
 
-        if(!slot.getStatus().equals(Status.ACTIVE)){
-            throw new CustomException(ErrorCode.SLOT_NOT_ACTIVE);
+        // 중복 예약 확인
+        if(interviewReservationRepository.existsByReservationCode(reservationCode)){
+            throw new CustomException(ErrorCode.ALREADY_RESERVED);
         }
 
         if (slot.getCurrentCandidates() >= slot.getMaxCandidates()) {
             throw new CustomException(ErrorCode.SLOT_FULL);
         }
 
-        Applicant applicant = applicantRepository.findById(request.getApplicantId())
-                .orElseThrow(() -> new CustomException(ErrorCode.APPLICANT_NOT_FOUND));
-
-        boolean alreadyReserved = interviewReservationRepository.existsByReservationCode(request.getReservationCode());
-        if (alreadyReserved) {
-            throw new CustomException(ErrorCode.ALREADY_RESERVED);
-        }
-
         // 예약 정보 저장
         InterviewReservation reservation = InterviewReservation.builder()
                 .slot(slot)
                 .applicant(applicant)
-                .reservationCode(request.getReservationCode())
+                .reservationCode(reservationCode) // 학번 + 전화번호 뒤 4자리
                 .build();
 
         interviewReservationRepository.save(reservation);
 
-        // 현재 예약 인원 증가
+        // 현재 예약 인원 증가 및 상태 업데이트
         slot.incrementCurrentCandidates();
     }
 

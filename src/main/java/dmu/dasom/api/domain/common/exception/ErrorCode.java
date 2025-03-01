@@ -27,6 +27,7 @@ public enum ErrorCode {
     INVALID_INQUIRY_PERIOD(400, "C018", "조회 기간이 아닙니다."),
     SHEET_WRITE_FAIL(400, "C019", "시트에 데이터를 쓰는데 실패하였습니다."),
     SHEET_READ_FAIL(400, "C200", "시트에 데이터를 쓰는데 실패하였습니다."),
+    FILE_ENCODE_FAIL(400, "C028", "파일 인코딩에 실패하였습니다.")
     ;
 
     private final int status;

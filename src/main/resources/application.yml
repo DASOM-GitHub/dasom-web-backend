@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: dasom-api
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
 springdoc:
   swagger-ui:
     path: /api/swagger-ui

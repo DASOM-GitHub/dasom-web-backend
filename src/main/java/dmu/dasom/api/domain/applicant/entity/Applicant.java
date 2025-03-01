@@ -92,7 +92,7 @@ public class Applicant {
                 this.email,
                 this.grade,
                 this.reasonForApply,
-                this.activityWish,
+                this.activityWish != null ? this.activityWish : "없음", // null일 경우 "없음" 반환
                 this.isPrivacyPolicyAgreed,
                 this.status.name(),
                 this.createdAt.toString(),

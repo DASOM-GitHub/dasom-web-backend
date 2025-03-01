@@ -26,7 +26,14 @@ public enum ErrorCode {
     INVALID_TIME_FORMAT(400, "C017", "시간 형식이 올바르지 않습니다."),
     INVALID_INQUIRY_PERIOD(400, "C018", "조회 기간이 아닙니다."),
     SHEET_WRITE_FAIL(400, "C019", "시트에 데이터를 쓰는데 실패하였습니다."),
-    SHEET_READ_FAIL(400, "C200", "시트에 데이터를 쓰는데 실패하였습니다."),
+    SHEET_READ_FAIL(400, "C200", "시트에 데이터를 읽는데 실패하였습니다."),
+    SLOT_NOT_FOUND(400, "C021", "슬롯을 찾을 수 없습니다."),
+    APPLICANT_NOT_FOUND(400, "C022", "지원자를 찾을 수 없습니다."),
+    ALREADY_RESERVED(400, "C023", "이미 예약된 지원자입니다."),
+    RESERVED_SLOT_CANNOT_BE_DELETED(400, "C024", "예약된 슬롯은 삭제할 수 없습니다."),
+    SLOT_FULL(400, "C025", "해당 슬롯이 가득 찼습니다."),
+    RESERVATION_NOT_FOUND(400, "C026", "예약을 찾을 수 없습니다."),
+    SLOT_NOT_ACTIVE(400, "C027", "해당 슬롯이 비활성화 되었습니다."),
     FILE_ENCODE_FAIL(400, "C028", "파일 인코딩에 실패하였습니다.")
     ;
 

@@ -26,8 +26,10 @@ public class ResultCheckResponseDto {
     @Size(max = 16)
     String name;
 
+    @Schema(description = "예약 코드", example = "202100005678")
+    String reservationCode; // 학번 전체 + 전화번호 뒤 4자리 조합 코드
+
     @NotNull
     @Schema(description = "결과", example = "true")
     Boolean isPassed;
-
 }

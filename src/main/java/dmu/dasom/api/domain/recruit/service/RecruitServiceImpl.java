@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +60,10 @@ public class RecruitServiceImpl implements RecruitService {
     // 합격 결과 확인
     @Override
     public ResultCheckResponseDto checkResult(final ResultCheckRequestDto request) {
+        // 예약 코드 생성
+        String reservationCode = generateReservationCode(request.getStudentNo(), request.getContactLastDigit());
+
+        // 결과 발표 시간 검증
         final Recruit recruit = switch (request.getType()) {
             case DOCUMENT_PASS -> findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
             case INTERVIEW_PASS -> findByKey(ConfigKey.INTERVIEW_PASS_ANNOUNCEMENT);
@@ -70,6 +75,7 @@ public class RecruitServiceImpl implements RecruitService {
         if (now.isBefore(parsedTime))
             throw new CustomException(ErrorCode.INVALID_INQUIRY_PERIOD);
 
+        // 지원자 정보 조회
         final ApplicantDetailsResponseDto applicant = applicantService.getApplicantByStudentNo(request.getStudentNo());
 
         // 연락처 뒷자리가 일치하지 않을 경우 예외 발생
@@ -81,6 +87,7 @@ public class RecruitServiceImpl implements RecruitService {
             .type(request.getType())
             .studentNo(applicant.getStudentNo())
             .name(applicant.getName())
+            .reservationCode(reservationCode)
             .isPassed(request.getType().equals(ResultCheckType.DOCUMENT_PASS) ?
                 applicant.getStatus()
                     .equals(ApplicantStatus.DOCUMENT_PASSED) :
@@ -118,5 +125,10 @@ public class RecruitServiceImpl implements RecruitService {
             throw new CustomException(ErrorCode.INVALID_DATETIME_FORMAT);
         }
     }
+
+    public String generateReservationCode(String studentNo, String contactLastDigits) {
+        return studentNo + contactLastDigits; // 학번 전체 + 전화번호 뒤 4자리
+    }
+
 
 }

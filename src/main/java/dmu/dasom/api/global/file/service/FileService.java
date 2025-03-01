@@ -2,6 +2,7 @@ package dmu.dasom.api.global.file.service;
 
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.news.entity.NewsEntity;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.entity.FileEntity;
 import dmu.dasom.api.global.file.enums.FileType;
@@ -60,6 +61,17 @@ public class FileService {
 
         if (ObjectUtils.isNotEmpty(files))
             fileRepository.deleteAll(files);
+    }
+
+    public void deleteFilesById(NewsEntity news, List<Long> fileIds) {
+        List<FileEntity> files = fileRepository.findAllById(fileIds);
+
+        List<FileEntity> filesToDelete = files.stream()
+            .filter(file -> file.getTargetId().equals(news.getId()))
+            .toList();
+
+        if (ObjectUtils.isNotEmpty(filesToDelete))
+            fileRepository.deleteAll(filesToDelete);
     }
 
     public Map<Long, FileResponseDto> getFirstFileByTypeAndTargetIds(FileType fileType, List<Long> targetIds) {

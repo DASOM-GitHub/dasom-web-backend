@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 
+@DynamicUpdate
 @Getter
 @Entity
 @Table(name = "news")
@@ -43,16 +45,6 @@ public class NewsEntity extends BaseEntity {
             .content(this.content)
             .createdAt(getCreatedAt())
             .images(ObjectUtils.isEmpty(images) ? null : images)
-            .build();
-    }
-
-    public NewsResponseDto toResponseDto() {
-        return NewsResponseDto.builder()
-            .id(this.id)
-            .title(this.title)
-            .content(this.content)
-            .createdAt(getCreatedAt())
-            .images(null)
             .build();
     }
 

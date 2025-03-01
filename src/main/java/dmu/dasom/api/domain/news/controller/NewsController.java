@@ -1,9 +1,6 @@
 package dmu.dasom.api.domain.news.controller;
 
-import dmu.dasom.api.domain.news.dto.NewsCreationResponseDto;
-import dmu.dasom.api.domain.news.dto.NewsListResponseDto;
-import dmu.dasom.api.domain.news.dto.NewsRequestDto;
-import dmu.dasom.api.domain.news.dto.NewsResponseDto;
+import dmu.dasom.api.domain.news.dto.*;
 import dmu.dasom.api.domain.news.service.NewsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +41,7 @@ public class NewsController {
     @Operation(summary = "뉴스 수정")
     @PutMapping("/{id}")
     public ResponseEntity<NewsResponseDto> updateNews(@PathVariable @Min(1) Long id,
-                                                      @Valid @RequestBody NewsRequestDto requestDto) {
+                                                      @Valid @RequestBody NewsUpdateRequestDto requestDto) {
         return ResponseEntity.ok(newsService.updateNews(id, requestDto));
     }
 

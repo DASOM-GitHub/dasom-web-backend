@@ -1,17 +1,15 @@
 package dmu.dasom.api.domain.news.service;
 
-import dmu.dasom.api.domain.news.dto.NewsCreationResponseDto;
-import dmu.dasom.api.domain.news.dto.NewsListResponseDto;
+import dmu.dasom.api.domain.news.dto.*;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.enums.FileType;
 import dmu.dasom.api.global.file.service.FileService;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
-import dmu.dasom.api.domain.news.dto.NewsRequestDto;
-import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
 import dmu.dasom.api.domain.news.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,13 +58,17 @@ public class NewsService {
 
     // 뉴스 수정
     @Transactional
-    public NewsResponseDto updateNews(Long id, NewsRequestDto requestDto) {
+    public NewsResponseDto updateNews(Long id, NewsUpdateRequestDto requestDto) {
         NewsEntity news = newsRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         news.update(requestDto.getTitle(), requestDto.getContent());
 
-        return news.toResponseDto();
+        // 삭제 요청된 이미지 삭제
+        if (ObjectUtils.isNotEmpty(requestDto.getDeleteImageIds()))
+            fileService.deleteFilesById(news, requestDto.getDeleteImageIds());
+
+        return news.toResponseDto(fileService.getFilesByTypeAndTargetId(FileType.NEWS, id));
     }
 
     // 뉴스 삭제

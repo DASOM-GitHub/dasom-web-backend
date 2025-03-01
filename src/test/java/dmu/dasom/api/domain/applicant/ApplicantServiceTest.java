@@ -3,6 +3,7 @@ package dmu.dasom.api.domain.applicant;
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
+import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
@@ -14,6 +15,7 @@ import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -46,6 +49,11 @@ class ApplicantServiceTest {
 
     @Mock
     private GoogleApiService googleApiService;
+
+    @BeforeEach
+    void setup() {
+        ReflectionTestUtils.setField(applicantService, "spreadSheetId", "test-spreadsheet-id");
+    }
 
     @Test
     @DisplayName("지원자 저장 - 성공")
@@ -239,6 +247,105 @@ class ApplicantServiceTest {
         // then
         verify(applicantRepository).findByStudentNo(studentNo);
         assertEquals(ErrorCode.ARGUMENT_NOT_VALID, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("지원자 상태 변경 - Google Sheets에 없는 사용자 추가")
+    void updateApplicantStatus_addToGoogleSheets() {
+        // given
+        Long applicantId = 1L;
+        String testSpreadsheetId = "test-spreadsheet-id";
+
+        ApplicantStatusUpdateRequestDto request = mock(ApplicantStatusUpdateRequestDto.class);
+        when(request.getStatus()).thenReturn(ApplicantStatus.INTERVIEW_PASSED);
+
+        // Mock 지원자 생성
+        Applicant mockApplicant = Applicant.builder()
+                .name("홍길동")
+                .studentNo("20210000")
+                .contact("010-1234-5678")
+                .email("hong@example.com")
+                .grade(2)
+                .reasonForApply("팀 활동 경험을 쌓고 싶습니다.")
+                .activityWish("프로그래밍 스터디 참여")
+                .isPrivacyPolicyAgreed(true)
+                .status(ApplicantStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(applicantRepository.findById(applicantId)).thenReturn(Optional.of(mockApplicant));
+
+        // 모든 인자를 Matchers로 설정
+        when(googleApiService.findRowIndexByStudentNo(eq(testSpreadsheetId), eq("Sheet1"), eq("20210000")))
+                .thenReturn(-1);
+
+        doNothing().when(googleApiService).appendToSheet(anyList());
+
+        // when
+        applicantService.updateApplicantStatus(applicantId, request);
+
+        // then
+        verify(applicantRepository).findById(applicantId);
+        verify(googleApiService).appendToSheet(List.of(mockApplicant));
+    }
+
+    @Test
+    @DisplayName("지원자 상태 변경 - Google Sheets에서 상태 업데이트")
+    void updateApplicantStatus_updateInGoogleSheets() {
+        // given
+        Long applicantId = 1L;
+
+        // 요청 DTO 설정
+        ApplicantStatusUpdateRequestDto request = mock(ApplicantStatusUpdateRequestDto.class);
+        when(request.getStatus()).thenReturn(ApplicantStatus.INTERVIEW_PASSED);
+
+        // Mock 지원자 생성
+        Applicant mockApplicant = Applicant.builder()
+                .name("홍길동")
+                .studentNo("20210000")
+                .contact("010-1234-5678")
+                .email("hong@example.com")
+                .grade(2)
+                .reasonForApply("팀 활동 경험을 쌓고 싶습니다.")
+                .activityWish("프로그래밍 스터디 참여")
+                .isPrivacyPolicyAgreed(true)
+                .status(ApplicantStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        // Repository와 GoogleApiService의 동작 모킹
+        when(applicantRepository.findById(applicantId)).thenReturn(Optional.of(mockApplicant));
+        when(googleApiService.findRowIndexByStudentNo(anyString(), eq("Sheet1"), eq("20210000"))).thenReturn(5); // Google Sheets에 있음
+        doNothing().when(googleApiService).updateSheet(anyList());
+
+        // when
+        applicantService.updateApplicantStatus(applicantId, request);
+
+        // then
+        verify(applicantRepository).findById(applicantId);
+        verify(googleApiService).updateSheet(List.of(mockApplicant));
+    }
+
+    @Test
+    @DisplayName("지원자 저장 - 덮어쓰기 (Google Sheets 연동 포함)")
+    void apply_overwrite_withGoogleSheets() {
+        // given
+        ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
+        when(request.getStudentNo()).thenReturn("20210000");
+
+        Applicant existingApplicant = mock(Applicant.class); // 기존 Applicant 객체 모킹
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(existingApplicant));
+
+        when(request.getIsOverwriteConfirmed()).thenReturn(true);
+
+        // when
+        applicantService.apply(request);
+
+        // then
+        verify(existingApplicant).overwrite(request);
+        verify(googleApiService).updateSheet(List.of(existingApplicant));
     }
 
 }

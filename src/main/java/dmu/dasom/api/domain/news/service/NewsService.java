@@ -1,65 +1,84 @@
 package dmu.dasom.api.domain.news.service;
 
-import dmu.dasom.api.domain.news.dto.NewsRequestDto;
-import dmu.dasom.api.domain.news.dto.NewsResponseDto;
+import dmu.dasom.api.domain.news.dto.*;
+import dmu.dasom.api.global.file.dto.FileResponseDto;
+import dmu.dasom.api.global.file.enums.FileType;
+import dmu.dasom.api.global.file.service.FileService;
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
 import dmu.dasom.api.domain.news.repository.NewsRepository;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NewsService {
 
     private final NewsRepository newsRepository;
+    private final FileService fileService;
 
-    public NewsService(NewsRepository newsRepository) {
-        this.newsRepository = newsRepository;
+    // 전체 뉴스 조회
+    public List<NewsListResponseDto> getAllNews() {
+        List<NewsEntity> news = newsRepository.findAll();
+
+        List<Long> newsIds = news.stream()
+            .map(NewsEntity::getId)
+            .toList();
+
+        Map<Long, FileResponseDto> firstFileMap = fileService.getFirstFileByTypeAndTargetIds(
+            FileType.NEWS,
+            newsIds
+        );
+
+        return news.stream()
+            .map(newsEntity -> newsEntity.toListResponseDto(firstFileMap.get(newsEntity.getId())))
+            .toList();
     }
 
-    // 전체 조회
-    public List<NewsResponseDto> getAllNews() {
-        return newsRepository.findAll().stream()
-                .map(NewsEntity::toResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    // 개별 조회
+    // 개별 뉴스 조회
     public NewsResponseDto getNewsById(Long id) {
-        return newsRepository.findById(id)
-                .map(NewsEntity::toResponseDto)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
-    }
-
-    // 생성
-    public NewsResponseDto createNews(NewsRequestDto requestDto) {
-        NewsEntity news = NewsEntity.builder()
-                .title(requestDto.getTitle())
-                .content(requestDto.getContent())
-                .imageUrl(requestDto.getImageUrl())
-                .build();
-
-        NewsEntity savedNews = newsRepository.save(news);
-        return savedNews.toResponseDto();
-    }
-
-    // 수정
-    @Transactional
-    public NewsResponseDto updateNews(Long id, NewsRequestDto requestDto) {
         NewsEntity news = newsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        news.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getImageUrl());
-        return news.toResponseDto();
+        return news.toResponseDto(fileService.getFilesByTypeAndTargetId(FileType.NEWS, id));
     }
 
-    // 삭제
+    // 뉴스 생성 (생성된 뉴스 ID 반환)
+    @Transactional
+    public NewsCreationResponseDto createNews(NewsRequestDto requestDto) {
+        return new NewsCreationResponseDto(newsRepository.save(requestDto.toEntity()).getId());
+    }
+
+    // 뉴스 수정
+    @Transactional
+    public NewsResponseDto updateNews(Long id, NewsUpdateRequestDto requestDto) {
+        NewsEntity news = newsRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        news.update(requestDto.getTitle(), requestDto.getContent());
+
+        // 삭제 요청된 이미지 삭제
+        if (ObjectUtils.isNotEmpty(requestDto.getDeleteImageIds()))
+            fileService.deleteFilesById(news, requestDto.getDeleteImageIds());
+
+        return news.toResponseDto(fileService.getFilesByTypeAndTargetId(FileType.NEWS, id));
+    }
+
+    // 뉴스 삭제
     @Transactional
     public void deleteNews(Long id) {
         NewsEntity news = newsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 뉴스가 존재하지 않습니다. ID: " + id));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
+        fileService.deleteFilesByTypeAndTargetId(FileType.NEWS, news.getId());
         newsRepository.delete(news);
     }
+
 }

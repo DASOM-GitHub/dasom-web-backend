@@ -38,6 +38,9 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final EmailService emailService;
     private final GoogleApiService googleApiService;
 
+    @Value("${google.spreadsheet.id}")
+    private String spreadSheetId;
+
     // 지원자 저장
     @Override
     public void apply(final ApplicantCreateRequestDto request) {
@@ -82,9 +85,20 @@ public class ApplicantServiceImpl implements ApplicantService {
     @Override
     public ApplicantDetailsResponseDto updateApplicantStatus(final Long id, final ApplicantStatusUpdateRequestDto request) {
         final Applicant applicant = findById(id);
-
+        // 지원자 상태 변경
         applicant.updateStatus(request.getStatus());
-        googleApiService.updateSheet(List.of(applicant));
+
+        // Google Sheets에서 학번(Student No)을 기준으로 사용자 존재 여부 확인
+        int rowIndex = googleApiService.findRowIndexByStudentNo(spreadSheetId, "Sheet1", applicant.getStudentNo());
+        if (rowIndex == -1) {
+            // Google Sheets에 사용자 추가
+            googleApiService.appendToSheet(List.of(applicant));
+            log.info("지원자가 Google Sheets에 없어서 새로 추가되었습니다: {}", applicant.getStudentNo());
+        } else {
+            // Google Sheets에서 사용자 상태 업데이트
+            googleApiService.updateSheet(List.of(applicant));
+            log.info("Google Sheets에서 지원자 상태가 업데이트되었습니다: {}", applicant.getStudentNo());
+        }
 
         return applicant.toApplicantDetailsResponse();
     }

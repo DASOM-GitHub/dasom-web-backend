@@ -96,26 +96,6 @@ public class RecruitServiceImpl implements RecruitService {
             .build();
     }
 
-    @Override
-    public LocalDate getInterviewStartDate() {
-        return LocalDate.parse(findByKey(ConfigKey.INTERVIEW_PERIOD_START).getValue());
-    }
-
-    @Override
-    public LocalDate getInterviewEndDate() {
-        return LocalDate.parse(findByKey(ConfigKey.INTERVIEW_PERIOD_END).getValue());
-    }
-
-    @Override
-    public LocalTime getInterviewStartTime() {
-        return LocalTime.parse(findByKey(ConfigKey.INTERVIEW_TIME_START).getValue());
-    }
-
-    @Override
-    public LocalTime getInterviewEndTime() {
-        return LocalTime.parse(findByKey(ConfigKey.INTERVIEW_TIME_END).getValue());
-    }
-
     // DB에 저장된 모든 Recruit 객체를 찾아 반환
     private List<Recruit> findAll() {
         return recruitRepository.findAll();

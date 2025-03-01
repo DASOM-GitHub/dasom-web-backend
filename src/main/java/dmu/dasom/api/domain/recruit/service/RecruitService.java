@@ -19,13 +19,4 @@ public interface RecruitService {
 
     ResultCheckResponseDto checkResult(final ResultCheckRequestDto request);
 
-    LocalDate getInterviewStartDate();
-
-    LocalDate getInterviewEndDate();
-
-    LocalTime getInterviewStartTime();
-
-    LocalTime getInterviewEndTime();
-
-
 }

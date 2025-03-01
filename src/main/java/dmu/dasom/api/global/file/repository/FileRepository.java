@@ -15,8 +15,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
     List<FileEntity> findByFileTypeAndTargetId(FileType fileType, Long targetId);
 
-    @Query("SELECT f FROM FileEntity f WHERE f.fileType = :fileType AND f.targetId = :targetId")
-    Optional<FileEntity> findFirstByFileTypeAndTargetIds(@Param("fileType") FileType fileType,
-                                             @Param("targetId") Long targetId);
+    @Query("SELECT f FROM FileEntity f WHERE f.fileType = :fileType AND f.targetId IN :targetIds AND f.id IN " +
+        "(SELECT MIN(f2.id) FROM FileEntity f2 WHERE f2.fileType = :fileType AND f2.targetId = f.targetId)")
+    List<FileEntity> findFirstFilesByTypeAndTargetIds(@Param("fileType") FileType fileType, @Param("targetIds") List<Long> targetIds);
 
 }

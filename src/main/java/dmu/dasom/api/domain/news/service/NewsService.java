@@ -1,6 +1,8 @@
 package dmu.dasom.api.domain.news.service;
 
 import dmu.dasom.api.domain.news.dto.NewsCreationResponseDto;
+import dmu.dasom.api.domain.news.dto.NewsListResponseDto;
+import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.enums.FileType;
 import dmu.dasom.api.global.file.service.FileService;
 import dmu.dasom.api.domain.common.exception.CustomException;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +27,20 @@ public class NewsService {
     private final FileService fileService;
 
     // 전체 뉴스 조회
-    public List<NewsResponseDto> getAllNews() {
+    public List<NewsListResponseDto> getAllNews() {
         List<NewsEntity> news = newsRepository.findAll();
 
-//        List<FileResponseDto> files = fileService.getFirstFileByTypeAndTargetId(
-//            FileType.NEWS,
-//            news.stream()
-//                .map(NewsEntity::getId)
-//                .toList()
-//        );
+        List<Long> newsIds = news.stream()
+            .map(NewsEntity::getId)
+            .toList();
+
+        Map<Long, FileResponseDto> firstFileMap = fileService.getFirstFileByTypeAndTargetIds(
+            FileType.NEWS,
+            newsIds
+        );
 
         return news.stream()
-            .map(NewsEntity::toResponseDto)
+            .map(newsEntity -> newsEntity.toListResponseDto(firstFileMap.get(newsEntity.getId())))
             .toList();
     }
 

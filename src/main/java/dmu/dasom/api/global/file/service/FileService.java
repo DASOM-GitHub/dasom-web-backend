@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +60,21 @@ public class FileService {
 
         if (ObjectUtils.isNotEmpty(files))
             fileRepository.deleteAll(files);
+    }
+
+    public Map<Long, FileResponseDto> getFirstFileByTypeAndTargetIds(FileType fileType, List<Long> targetIds) {
+        if (targetIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<FileEntity> firstFiles = fileRepository.findFirstFilesByTypeAndTargetIds(fileType, targetIds);
+
+        return firstFiles.stream()
+            .collect(Collectors.toMap(
+                FileEntity::getTargetId,
+                FileEntity::toResponseDto,
+                (existing, replacement) -> existing
+            ));
     }
 
     private List<FileEntity> findByFileTypeAndTargetId(FileType fileType, Long targetId) {

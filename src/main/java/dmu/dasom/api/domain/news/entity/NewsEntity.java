@@ -1,6 +1,7 @@
 package dmu.dasom.api.domain.news.entity;
 
 import dmu.dasom.api.domain.common.BaseEntity;
+import dmu.dasom.api.domain.news.dto.NewsListResponseDto;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,6 +53,15 @@ public class NewsEntity extends BaseEntity {
             .content(this.content)
             .createdAt(getCreatedAt())
             .images(null)
+            .build();
+    }
+
+    public NewsListResponseDto toListResponseDto(FileResponseDto file) {
+        return NewsListResponseDto.builder()
+            .id(this.id)
+            .title(this.title)
+            .createdAt(getCreatedAt())
+            .image(file)
             .build();
     }
 

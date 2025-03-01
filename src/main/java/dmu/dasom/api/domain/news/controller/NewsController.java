@@ -1,6 +1,7 @@
 package dmu.dasom.api.domain.news.controller;
 
 import dmu.dasom.api.domain.news.dto.NewsCreationResponseDto;
+import dmu.dasom.api.domain.news.dto.NewsListResponseDto;
 import dmu.dasom.api.domain.news.dto.NewsRequestDto;
 import dmu.dasom.api.domain.news.dto.NewsResponseDto;
 import dmu.dasom.api.domain.news.service.NewsService;
@@ -24,7 +25,7 @@ public class NewsController {
 
     @Operation(summary = "전체 뉴스 조회 (썸네일 포함)")
     @GetMapping
-    public ResponseEntity<List<NewsResponseDto>> getAllNews() {
+    public ResponseEntity<List<NewsListResponseDto>> getAllNews() {
         return ResponseEntity.ok(newsService.getAllNews());
     }
 

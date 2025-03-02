@@ -4,6 +4,7 @@ import dmu.dasom.api.domain.applicant.entity.Applicant;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.interview.dto.InterviewReservationApplicantResponseDto;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 import dmu.dasom.api.domain.interview.entity.InterviewReservation;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -140,6 +142,26 @@ public class InterviewServiceImpl implements InterviewService{
                 .stream()
                 .map(InterviewSlotResponseDto::new)
                 .toList();
+    }
+
+    @Override
+    public List<InterviewReservationApplicantResponseDto> getAllInterviewApplicants() {
+        List<InterviewReservation> reservations = interviewReservationRepository.findAll();
+
+        return reservations.stream()
+                .map(reservation -> {
+                    Applicant applicant = reservation.getApplicant();
+                    return InterviewReservationApplicantResponseDto.builder()
+                            .applicantId(applicant.getId())
+                            .applicantName(applicant.getName())
+                            .studentNo(applicant.getStudentNo())
+                            .contact(applicant.getContact())
+                            .email(applicant.getEmail())
+                            .activityWish(applicant.getActivityWish())
+                            .reasonForApply(applicant.getReasonForApply())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
 }

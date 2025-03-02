@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.interview.service;
 
+import dmu.dasom.api.domain.interview.dto.InterviewReservationApplicantResponseDto;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 
@@ -23,5 +24,7 @@ public interface InterviewService {
     void cancelReservation(Long reservationId, Long applicantId);
 
     List<InterviewSlotResponseDto> getAllInterviewSlots();
+
+    List<InterviewReservationApplicantResponseDto> getAllInterviewApplicants();
 
 }

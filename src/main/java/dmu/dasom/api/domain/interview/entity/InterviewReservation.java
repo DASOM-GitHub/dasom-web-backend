@@ -35,5 +35,5 @@ public class InterviewReservation {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; // 생성 시간
+    private LocalDateTime createdAt; // 생성
 }

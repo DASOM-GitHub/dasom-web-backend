@@ -110,5 +110,22 @@ public class RecruitController {
         return ResponseEntity.ok().build();
     }
 
+    // 예약 가능한 면접 일정 조회
+    @Operation(summary = "예약 가능한 면접 일정 조회", description = "예약 가능한 면접 슬롯 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "예약 가능한 면접 슬롯 조회 성공")
+    @GetMapping("/interview/available")
+    public ResponseEntity<List<InterviewSlotResponseDto>> getAvailableInterviewSlots() {
+        List<InterviewSlotResponseDto> availableSlots = interviewService.getAvailableSlots();
+        return ResponseEntity.ok(availableSlots);
+    }
+
+    // 모든 면접 일정 조회
+    @Operation(summary = "모든 면접 일정 조회", description = "모든 면접 슬롯 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "모든 면접 슬롯 조회 성공")
+    @GetMapping("/interview/all")
+    public ResponseEntity<List<InterviewSlotResponseDto>> getAllInterviewSlots() {
+        List<InterviewSlotResponseDto> allSlots = interviewService.getAllInterviewSlots();
+        return ResponseEntity.ok(allSlots);
+    }
 
 }

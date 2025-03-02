@@ -131,5 +131,13 @@ public class InterviewServiceImpl implements InterviewService{
         // 예약 삭제
         interviewReservationRepository.delete(reservation);
     }
+  
+    @Override
+    public List<InterviewSlotResponseDto> getAllInterviewSlots() {
+        return interviewSlotRepository.findAll()
+                .stream()
+                .map(InterviewSlotResponseDto::new)
+                .toList();
+    }
 
 }

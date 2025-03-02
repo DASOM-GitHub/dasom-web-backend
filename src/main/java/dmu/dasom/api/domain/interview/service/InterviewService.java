@@ -24,5 +24,4 @@ public interface InterviewService {
 
     List<InterviewSlotResponseDto> getAllInterviewSlots();
 
-
 }

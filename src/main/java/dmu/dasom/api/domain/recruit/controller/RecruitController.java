@@ -128,5 +128,4 @@ public class RecruitController {
         return ResponseEntity.ok(allSlots);
     }
 
-
 }

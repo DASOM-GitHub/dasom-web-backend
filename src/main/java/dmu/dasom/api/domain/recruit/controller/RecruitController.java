@@ -3,10 +3,7 @@ package dmu.dasom.api.domain.recruit.controller;
 import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
-import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
-import dmu.dasom.api.domain.interview.dto.InterviewSlotCreateRequestDto;
-import dmu.dasom.api.domain.interview.dto.InterviewSlotRequestDto;
-import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
+import dmu.dasom.api.domain.interview.dto.*;
 import dmu.dasom.api.domain.interview.service.InterviewService;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
@@ -126,6 +123,12 @@ public class RecruitController {
     public ResponseEntity<List<InterviewSlotResponseDto>> getAllInterviewSlots() {
         List<InterviewSlotResponseDto> allSlots = interviewService.getAllInterviewSlots();
         return ResponseEntity.ok(allSlots);
+    }
+
+    @GetMapping("/interview/applicants")
+    public ResponseEntity<List<InterviewReservationApplicantResponseDto>> getAllInterviewApplicants() {
+        List<InterviewReservationApplicantResponseDto> applicants = interviewService.getAllInterviewApplicants();
+        return ResponseEntity.ok(applicants);
     }
 
 }

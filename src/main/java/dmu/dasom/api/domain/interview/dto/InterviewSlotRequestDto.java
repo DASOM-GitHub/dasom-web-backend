@@ -26,7 +26,7 @@ public class InterviewSlotRequestDto {
     private LocalTime startTime; // 시작 시간
 
     @NotNull(message = "종료 시간은 필수 입력 값입니다.")
-    @Schema(description = "면접 종료 시간", example = "10:20")
+    @Schema(description = "면접 종료 시간", example = "17:00")
     private LocalTime endTime; // 종료 시간
 
     @NotNull(message = "최대 지원자 수는 필수 입력 값입니다.")

@@ -155,6 +155,7 @@ public class InterviewServiceImpl implements InterviewService{
         return reservations.stream()
                 .map(reservation -> {
                     Applicant applicant = reservation.getApplicant();
+                    InterviewSlot slot = reservation.getSlot();
                     return InterviewReservationApplicantResponseDto.builder()
                             .applicantId(applicant.getId())
                             .applicantName(applicant.getName())
@@ -163,6 +164,9 @@ public class InterviewServiceImpl implements InterviewService{
                             .email(applicant.getEmail())
                             .activityWish(applicant.getActivityWish())
                             .reasonForApply(applicant.getReasonForApply())
+                            .interviewDate(slot.getInterviewDate())
+                            .interviewTime(slot.getStartTime())
+                            .appliedDate(reservation.getCreatedAt())
                             .build();
                 })
                 .collect(Collectors.toList());

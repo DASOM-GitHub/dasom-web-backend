@@ -4,6 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,4 +41,18 @@ public class InterviewReservationApplicantResponseDto {
 
     @Schema(description = "지원 동기", example = "동아리 활동을 통해 새로운 경험을 쌓고 싶어서 지원합니다.")
     private String reasonForApply;
+
+    @NotNull(message = "면접 일자는 필수 값입니다.")
+    @Schema(description = "면접 일자", example = "2025-03-12")
+    private LocalDate interviewDate;
+
+    @NotNull(message = "면접 시간은 필수 값입니다.")
+    @Schema(description = "면접 시간", example = "10:00")
+    private LocalTime interviewTime;
+
+    @NotNull(message = "면접 신청 날짜는 필수 값입니다.")
+    @Schema(description = "면접 신청 날짜", example = "2025-03-01T12:00:00")
+    private LocalDateTime appliedDate;
+
+
 }

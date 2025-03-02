@@ -12,7 +12,9 @@ import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import dmu.dasom.api.domain.interview.repositoty.InterviewReservationRepository;
 import dmu.dasom.api.domain.interview.repositoty.InterviewSlotRepository;
 import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
+import jakarta.persistence.EntityListeners;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
+@EntityListeners(AuditingEntityListener.class) // Auditing 기능 활성화
 public class InterviewServiceImpl implements InterviewService{
 
     private final InterviewSlotRepository interviewSlotRepository;
@@ -31,7 +34,6 @@ public class InterviewServiceImpl implements InterviewService{
     private final ApplicantRepository applicantRepository;
     private final RecruitServiceImpl recruitService;
 
-    // 면접 슬롯 생성
     @Override
     @Transactional
     public List<InterviewSlotResponseDto> createInterviewSlots(LocalDate newStartDate, LocalDate newEndDate, LocalTime newStartTime, LocalTime newEndTime) {

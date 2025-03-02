@@ -1,6 +1,7 @@
 package dmu.dasom.api.domain.interview.dto;
 
 import dmu.dasom.api.domain.interview.entity.InterviewSlot;
+import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -45,6 +46,10 @@ public class InterviewSlotResponseDto {
     @Schema(description = "현재 해당 슬롯에 예약된 지원자 수", example = "1")
     private Integer currentCandidates; // 현재 예약된 지원자 수
 
+    @NotNull(message = "면접 슬롯 상태는 필수 입력 값입니다.")
+    @Schema(description = "면접 슬롯의 상태 (ACTIVE, INACTIVE, CLOSED)", example = "ACTIVE")
+    private InterviewStatus interviewStatus; // 면접 슬롯 상태
+
     public InterviewSlotResponseDto(InterviewSlot slot){
         this.id = slot.getId();
         this.interviewDate = slot.getInterviewDate();
@@ -52,6 +57,7 @@ public class InterviewSlotResponseDto {
         this.endTime = slot.getEndTime();
         this.maxCandidates = slot.getMaxCandidates();
         this.currentCandidates = slot.getCurrentCandidates();
+        this.interviewStatus = slot.getInterviewStatus();
     }
 
 }

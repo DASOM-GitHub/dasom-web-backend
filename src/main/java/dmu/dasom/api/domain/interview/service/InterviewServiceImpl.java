@@ -39,10 +39,14 @@ public class InterviewServiceImpl implements InterviewService{
     @Override
     @Transactional
     public List<InterviewSlotResponseDto> createInterviewSlots(LocalDate newStartDate, LocalDate newEndDate, LocalTime newStartTime, LocalTime newEndTime) {
-        boolean slotsExist = interviewSlotRepository.existsAny();
+        List<InterviewSlot> existingSlots = interviewSlotRepository.findAll();
 
-        if(slotsExist){
-            interviewSlotRepository.deleteAll();
+        if(!existingSlots.isEmpty()){
+            List<InterviewSlot> slotsToDelete = existingSlots.stream()
+                    .filter(slot -> slot.getCurrentCandidates() == 0)
+                    .toList();
+
+            interviewSlotRepository.deleteAll(slotsToDelete);
         }
 
         List<InterviewSlotResponseDto> newSlots = new ArrayList<>();

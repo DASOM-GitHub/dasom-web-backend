@@ -132,4 +132,12 @@ public class InterviewServiceImpl implements InterviewService{
         interviewReservationRepository.delete(reservation);
     }
 
+    @Override
+    public List<InterviewSlotResponseDto> getAllInterviewSlots() {
+        return interviewSlotRepository.findAll()
+                .stream()
+                .map(InterviewSlotResponseDto::new)
+                .toList();
+    }
+
 }

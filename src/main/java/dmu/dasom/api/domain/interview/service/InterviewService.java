@@ -22,5 +22,7 @@ public interface InterviewService {
     // 면접 예약 취소
     void cancelReservation(Long reservationId, Long applicantId);
 
+    List<InterviewSlotResponseDto> getAllInterviewSlots();
+
 
 }

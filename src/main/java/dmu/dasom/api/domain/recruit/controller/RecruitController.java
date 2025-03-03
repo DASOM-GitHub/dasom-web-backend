@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/recruit")
 @RequiredArgsConstructor
+@Tag(name = "Recruit API", description = "부원 모집 API")
 public class RecruitController {
 
     private final ApplicantService applicantService;
@@ -84,20 +86,6 @@ public class RecruitController {
         return ResponseEntity.ok(applicantService.checkResult(request));
     }
 
-    // 면접 일정 생성
-    @Operation(summary = "면접 일정 생성", description = "새로운 면접 일정을 생성합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "면접 일정 생성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    })
-    @PostMapping("/interview/schedule")
-    public ResponseEntity<List<InterviewSlotResponseDto>> createInterviewSlots(@Valid @RequestBody InterviewSlotCreateRequestDto request) {
-
-        List<InterviewSlotResponseDto> slots =
-                interviewService.createInterviewSlots(request.getStartDate(), request.getEndDate(), request.getStartTime(), request.getEndTime());
-        return ResponseEntity.ok(slots);
-    }
-
     // 면접 예약
     @Operation(summary = "면접 예약", description = "지원자가 특정 면접 슬롯을 예약합니다.")
     @ApiResponses(value = {
@@ -126,12 +114,6 @@ public class RecruitController {
     public ResponseEntity<List<InterviewSlotResponseDto>> getAllInterviewSlots() {
         List<InterviewSlotResponseDto> allSlots = interviewService.getAllInterviewSlots();
         return ResponseEntity.ok(allSlots);
-    }
-
-    @GetMapping("/interview/applicants")
-    public ResponseEntity<List<InterviewReservationApplicantResponseDto>> getAllInterviewApplicants() {
-        List<InterviewReservationApplicantResponseDto> applicants = interviewService.getAllInterviewApplicants();
-        return ResponseEntity.ok(applicants);
     }
 
 }

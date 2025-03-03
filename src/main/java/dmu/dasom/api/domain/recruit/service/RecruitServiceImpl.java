@@ -1,12 +1,7 @@
 package dmu.dasom.api.domain.recruit.service;
 
-import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
-import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
-import dmu.dasom.api.domain.applicant.service.ApplicantService;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
-import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
-import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitConfigResponseDto;
 import dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto;
 import dmu.dasom.api.domain.recruit.entity.Recruit;
@@ -17,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +24,6 @@ import java.util.List;
 public class RecruitServiceImpl implements RecruitService {
 
     private final RecruitRepository recruitRepository;
-    private final ApplicantService applicantService;
 
     // 모집 일정 설정 조회
     @Override
@@ -57,43 +50,28 @@ public class RecruitServiceImpl implements RecruitService {
         config.updateDateTime(dateTime);
     }
 
-    // 합격 결과 확인
+    // 모집 기간 여부 확인
     @Override
-    public ResultCheckResponseDto checkResult(final ResultCheckRequestDto request) {
-        // 예약 코드 생성
-        String reservationCode = generateReservationCode(request.getStudentNo(), request.getContactLastDigit());
+    public boolean isRecruitmentActive() {
+        final LocalDateTime recruitStartPeriod = parseDateTimeFormat(findByKey(ConfigKey.RECRUITMENT_PERIOD_START).getValue());
+        final LocalDateTime recruitEndPeriod = parseDateTimeFormat(findByKey(ConfigKey.RECRUITMENT_PERIOD_END).getValue());
+        final LocalDateTime now = LocalDateTime.now();
 
-        // 결과 발표 시간 검증
-        final Recruit recruit = switch (request.getType()) {
+        return now.isAfter(recruitStartPeriod) && now.isBefore(recruitEndPeriod);
+    }
+
+    @Override
+    public String generateReservationCode(String studentNo, String contactLastDigits) {
+        return studentNo + contactLastDigits; // 학번 전체 + 전화번호 뒤 4자리
+    }
+
+    @Override
+    public LocalDateTime getResultAnnouncementSchedule(ResultCheckType type) {
+        final Recruit recruit = switch (type) {
             case DOCUMENT_PASS -> findByKey(ConfigKey.DOCUMENT_PASS_ANNOUNCEMENT);
             case INTERVIEW_PASS -> findByKey(ConfigKey.INTERVIEW_PASS_ANNOUNCEMENT);
         };
-        final LocalDateTime parsedTime = parseDateTimeFormat(recruit.getValue());
-
-        // 설정 된 시간이 현재 시간보다 이전인 경우 예외 발생
-        final LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(parsedTime))
-            throw new CustomException(ErrorCode.INVALID_INQUIRY_PERIOD);
-
-        // 지원자 정보 조회
-        final ApplicantDetailsResponseDto applicant = applicantService.getApplicantByStudentNo(request.getStudentNo());
-
-        // 연락처 뒷자리가 일치하지 않을 경우 예외 발생
-        if (!applicant.getContact().split("-")[2].equals(request.getContactLastDigit()))
-            throw new CustomException(ErrorCode.ARGUMENT_NOT_VALID);
-
-        // 합격 여부 반환
-        return ResultCheckResponseDto.builder()
-            .type(request.getType())
-            .studentNo(applicant.getStudentNo())
-            .name(applicant.getName())
-            .reservationCode(reservationCode)
-            .isPassed(request.getType().equals(ResultCheckType.DOCUMENT_PASS) ?
-                applicant.getStatus()
-                    .equals(ApplicantStatus.DOCUMENT_PASSED) :
-                applicant.getStatus()
-                    .equals(ApplicantStatus.INTERVIEW_PASSED))
-            .build();
+        return parseDateTimeFormat(recruit.getValue());
     }
 
     // DB에 저장된 모든 Recruit 객체를 찾아 반환
@@ -125,10 +103,5 @@ public class RecruitServiceImpl implements RecruitService {
             throw new CustomException(ErrorCode.INVALID_DATETIME_FORMAT);
         }
     }
-
-    public String generateReservationCode(String studentNo, String contactLastDigits) {
-        return studentNo + contactLastDigits; // 학번 전체 + 전화번호 뒤 4자리
-    }
-
 
 }

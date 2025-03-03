@@ -18,7 +18,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker image
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6.7.0
         with:
           context: .

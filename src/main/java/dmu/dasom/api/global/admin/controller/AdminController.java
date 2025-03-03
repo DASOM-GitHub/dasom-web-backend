@@ -153,7 +153,7 @@ public class AdminController {
     public ResponseEntity<Void> sendEmailsToApplicants(
         @RequestParam
         @Parameter(description = "메일 발송 타입", examples = {
-            @ExampleObject(name = "서류 합격 메일", value = "DOCUMENT_PASS"),
+            @ExampleObject(name = "서류 합격 메일", value = "DOCUMENT_RESULT"),
             @ExampleObject(name = "최종 결과 메일", value = "FINAL_RESULT")
         }) MailType mailType
     ) {

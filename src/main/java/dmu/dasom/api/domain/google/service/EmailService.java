@@ -1,8 +1,8 @@
-package dmu.dasom.api.domain.email.service;
+package dmu.dasom.api.domain.google.service;
 
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
-import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.google.enums.MailType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

@@ -138,3 +138,88 @@
 - 추가적으로 검토가 필요한 사항이나 관련 문서, 디자인 파일 등의 링크를 첨부합니다.
   (예: API 명세서, 디자인 목업 파일 링크 등)
 ```
+
+## 패키지 구조
+
+### 백엔드
+```
+dmu.dasom.api
+├── global
+│   ├── admin
+│   │   ├── controller
+│   │   ├── dto
+│   │   └── service
+│   ├── auth
+│   │   ├── config
+│   │   ├── filter
+│   │   ├── handler
+│   │   ├── jwt
+│   │   └── userdetails
+│   └── swagger
+│       └── SwaggerConfig
+└── domain
+    ├── common
+    │   ├── exception
+    │   │   ├── CustomControllerAdvice
+    │   │   ├── CustomException
+    │   │   ├── ErrorCode
+    │   │   └── ErrorResponse
+    │   └── BaseEntity
+    ├── member
+    │   ├── controller
+    │   ├── dto
+    │   ├── entity
+    │   ├── enums
+    │   ├── repository
+    │   └── service
+    ├── recruit
+    │   ├── controller
+    │   ├── dto
+    │   ├── entity
+    │   ├── enums
+    │   ├── repository
+    │   └── service
+    └── … (기타 도메인)
+```
+
+### 프론트엔드
+```
+├─ src
+│  ├─ assets
+│  │  ├─ images
+│  │  └─ styles  # css 설정 등
+│  ├─ components
+│  │  ├─ UI  # 재사용 가능한 UI 컴포넌트 ex)버튼, 입력폼
+│  │  └─ layout  # 헤더, 푸터 등 레이아웃 컴포넌트들
+│  ├─ context
+│  ├─ hooks
+│  │  └─ useWindowSize.tsx
+│  ├─ pages
+│  │  ├─ Main.tsx
+│  │  ├─ FAQ.tsx
+│  │  ├─ News.tsx
+│  │  ├─ NewsInfo.tsx
+│  │  ├─ CoreMembers.tsx
+│  │  ├─ Login.tsx
+│  │  ├─ Recruit.tsx
+│  │  ├─ RecruitCheck.tsx
+│  │  ├─ RecruitCheckFinal.tsx
+│  │  ├─ RecruitMeeting.tsx
+│  │  ├─ RecruitResult.tsx
+│  │  ├─ RecruitSubmit.tsx
+│  │  ├─ RecruitSubmitMeeting.tsx
+│  │  ├─ UserMain.tsx
+│  │  └─ admin
+│  │     ├─ AdminMain.tsx
+│  │     ├─ ManMembers.tsx
+│  │     ├─ ManApplicants.tsx
+│  │     ├─ ManRecruitDate.tsx
+│  │     └─ ManNews.tsx
+│  ├─ utils
+│  │  └─ utils.ts
+│  └─ types
+├─ App.tsx
+├─ index.tsx
+├─ react-app-env.d.ts
+└─ setupTests.ts
+```

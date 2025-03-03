@@ -64,21 +64,6 @@ public class GoogleApiService {
         return sheetsService;
     }
 
-    public void writeToSheet(String spreadsheetId, String range, List<List<Object>> values) {
-        try {
-            Sheets service = getSheetsService();
-            ValueRange body = new ValueRange().setValues(values);
-            service.spreadsheets()
-                .values()
-                .update(spreadsheetId, range, body)
-                .setValueInputOption("USER_ENTERED")
-                .execute();
-        } catch (IOException | GeneralSecurityException e) {
-            log.error("시트에 데이터를 쓰는 데 실패했습니다.");
-            throw new CustomException(ErrorCode.WRITE_FAIL);
-        }
-    }
-
     public void appendToSheet(List<Applicant> applicants) {
         processSheetsUpdate(applicants, true);
     }

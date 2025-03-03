@@ -4,9 +4,7 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
 import dmu.dasom.api.domain.applicant.service.ApplicantService;
-import dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto;
-import dmu.dasom.api.domain.recruit.service.RecruitService;
-import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.google.enums.MailType;
 import dmu.dasom.api.global.dto.PageResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +23,12 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/applicants")
 @RequiredArgsConstructor
-public class AdminController {
+@Tag(name = "ADMIN - Applicant API", description = "어드민 지원자 관리 API")
+public class AdminApplicantController {
 
     private final ApplicantService applicantService;
-    private final RecruitService recruitService;
 
     // 지원자 조회
     @Operation(summary = "지원자 전체 조회")
@@ -48,7 +47,7 @@ public class AdminController {
             )
         )
     })
-    @GetMapping("/applicants")
+    @GetMapping
     public ResponseEntity<PageResponse<ApplicantResponseDto>> getApplicants(
         @RequestParam(value = "page", defaultValue = "0") @Min(0) final int page
     ) {
@@ -72,7 +71,7 @@ public class AdminController {
             )
         )
     })
-    @GetMapping("/applicants/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ApplicantDetailsResponseDto> getApplicant(@PathVariable("id") @Min(0) final Long id) {
         return ResponseEntity.ok(applicantService.getApplicant(id));
     }
@@ -94,39 +93,12 @@ public class AdminController {
             )
         )
     })
-    @PatchMapping("/applicants/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<ApplicantDetailsResponseDto> updateApplicantStatus(
         @PathVariable("id") @Min(0) final Long id,
         @Valid @RequestBody final ApplicantStatusUpdateRequestDto request
     ) {
         return ResponseEntity.ok(applicantService.updateApplicantStatus(id, request));
-    }
-
-    // 모집 일정 수정
-    @Operation(summary = "모집 일정 수정")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "모집 일정 수정 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = {
-                    @ExampleObject(
-                        name = "날짜 형식 오류",
-                        value = "{ \"code\": \"C016\", \"message\": \"날짜 형식이 올바르지 않습니다.\" }"
-                    ),
-                    @ExampleObject(
-                        name = "시간 형식 오류",
-                        value = "{ \"code\": \"C017\", \"message\": \"시간 형식이 올바르지 않습니다.\" }"
-                    )
-                }
-            )
-        )
-    })
-    @PatchMapping("/recruit/schedule")
-    public ResponseEntity<Void> modifyRecruitSchedule(@Valid @RequestBody final RecruitScheduleModifyRequestDto request) {
-        recruitService.modifyRecruitSchedule(request);
-        return ResponseEntity.ok().build();
     }
 
     // 메일 전송
@@ -149,7 +121,7 @@ public class AdminController {
             )
         )
     })
-    @PostMapping("/applicants/send-email")
+    @PostMapping("/send-email")
     public ResponseEntity<Void> sendEmailsToApplicants(
         @RequestParam
         @Parameter(description = "메일 발송 타입", examples = {

@@ -12,6 +12,10 @@ import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.domain.google.service.GoogleApiService;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
+import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
+import dmu.dasom.api.domain.recruit.service.RecruitService;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import java.util.List;
@@ -37,6 +42,7 @@ public class ApplicantServiceImpl implements ApplicantService {
     private final ApplicantRepository applicantRepository;
     private final EmailService emailService;
     private final GoogleApiService googleApiService;
+    private final RecruitService recruitService;
 
     @Value("${google.spreadsheet.id}")
     private String spreadSheetId;
@@ -44,6 +50,9 @@ public class ApplicantServiceImpl implements ApplicantService {
     // 지원자 저장
     @Override
     public void apply(final ApplicantCreateRequestDto request) {
+        if (!recruitService.isRecruitmentActive())
+            throw new CustomException(ErrorCode.RECRUITMENT_NOT_ACTIVE);
+
         final Optional<Applicant> applicant = findByStudentNo(request.getStudentNo());
 
         // 이미 지원한 학번이 존재할 경우
@@ -137,6 +146,41 @@ public class ApplicantServiceImpl implements ApplicantService {
         return findByStudentNo(studentNo)
             .map(Applicant::toApplicantDetailsResponse)
             .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
+    }
+
+    // 합격 결과 확인
+    @Override
+    public ResultCheckResponseDto checkResult(final ResultCheckRequestDto request) {
+        // 결과 발표 시간 검증
+        final LocalDateTime resultAnnouncementSchedule = recruitService.getResultAnnouncementSchedule(request.getType());
+
+        // 설정 된 시간이 현재 시간보다 이전인 경우 예외 발생
+        final LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(resultAnnouncementSchedule))
+            throw new CustomException(ErrorCode.INVALID_INQUIRY_PERIOD);
+
+        // 지원자 정보 조회
+        final ApplicantDetailsResponseDto applicant = getApplicantByStudentNo(request.getStudentNo());
+
+        // 연락처 뒷자리가 일치하지 않을 경우 예외 발생
+        if (!applicant.getContact().split("-")[2].equals(request.getContactLastDigit()))
+            throw new CustomException(ErrorCode.ARGUMENT_NOT_VALID);
+
+        // 예약 코드 생성
+        String reservationCode = recruitService.generateReservationCode(request.getStudentNo(), request.getContactLastDigit());
+
+        // 합격 여부 반환
+        return ResultCheckResponseDto.builder()
+            .type(request.getType())
+            .studentNo(applicant.getStudentNo())
+            .name(applicant.getName())
+            .reservationCode(reservationCode)
+            .isPassed(request.getType().equals(ResultCheckType.DOCUMENT_PASS) ?
+                applicant.getStatus()
+                    .equals(ApplicantStatus.DOCUMENT_PASSED) :
+                applicant.getStatus()
+                    .equals(ApplicantStatus.INTERVIEW_PASSED))
+            .build();
     }
 
     // Repository에서 ID로 지원자 조회

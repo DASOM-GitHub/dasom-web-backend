@@ -78,7 +78,7 @@ public class RecruitController {
     })
     @GetMapping("/result")
     public ResponseEntity<ResultCheckResponseDto> checkResult(@ModelAttribute final ResultCheckRequestDto request) {
-        return ResponseEntity.ok(recruitService.checkResult(request));
+        return ResponseEntity.ok(applicantService.checkResult(request));
     }
 
     // 면접 일정 생성

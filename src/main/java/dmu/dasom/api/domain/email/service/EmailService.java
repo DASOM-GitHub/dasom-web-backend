@@ -17,8 +17,9 @@ import org.thymeleaf.context.Context;
 @Service
 public class EmailService {
 
-    private JavaMailSender javaMailSender;
-    private TemplateEngine templateEngine;
+    private final TemplateEngine templateEngine;
+    private final JavaMailSender javaMailSender;
+
     @Value("${spring.mail.username}")
     private String from;
 
@@ -26,24 +27,26 @@ public class EmailService {
         if (mailType == null){
             throw new CustomException(ErrorCode.MAIL_TYPE_NOT_VALID);
         }
+
         // 메일 제목 및 템플릿 설정
         String subject;
         String emailContent;
-        String buttonUrl = "#";
+        String buttonUrl = "https://dmu-dasom.netlify.app/recruit/result";
         String buttonText;
+
         switch (mailType) {
             case DOCUMENT_RESULT -> {
                 subject = "동양미래대학교 컴퓨터소프트웨어공학과 전공 동아리 DASOM 서류 결과 안내";
-                emailContent = "먼저 다솜 34기에 많은 관심을 갖고 지원해 주셔서 감사드리며,<br>" +
-                        "내부 서류 평가 결과 및 추후 일정에 관해 안내드리고자 이메일을 발송하게 되었습니다.<br>" +
-                        "모집 폼 합/불합 결과는 아래 버튼 혹은 홈페이지를 통해 확인이 가능합니다.";
+                emailContent = "먼저 다솜 34기에 많은 관심을 두고 지원해 주셔서 감사드리며,<br>" +
+                        "내부 서류 평가 결과 및 추후 일정에 관해 안내해드리고자 이메일을 발송하게 되었습니다.<br>" +
+                        "서류 전형 결과는 아래 버튼 혹은 홈페이지를 통해 확인이 가능합니다.";
                 buttonText = "서류 결과 확인하기";
             }
             case FINAL_RESULT -> {
-                subject = "동양미래대학교 컴퓨터소프트웨어공학과 전공 동아리 DASOM 최종 합격 안내";
-                emailContent = "먼저 다솜 34기에 많은 관심을 갖고 지원해 주셔서 감사드리며,<br>" +
-                        "최종 면접 결과 및 추후 일정에 관해 안내드리고자 이메일을 발송하게 되었습니다.<br>" +
-                        "모집 폼 합/불합 결과는 아래 버튼 혹은 홈페이지를 통해 확인이 가능합니다.";
+                subject = "동양미래대학교 컴퓨터소프트웨어공학과 전공 동아리 DASOM 최종 면접 결과 안내";
+                emailContent = "먼저 다솜 34기에 많은 관심을 두고 지원해 주셔서 감사드리며,<br>" +
+                        "최종 면접 결과 및 추후 일정에 관해 안내해드리고자 이메일을 발송하게 되었습니다.<br>" +
+                        "최종 면접 결과는 아래 버튼 혹은 홈페이지를 통해 확인이 가능합니다.";
                 buttonText = "최종 결과 확인하기";
             }
             default -> throw new IllegalStateException("Unexpected value: " + mailType);
@@ -66,7 +69,10 @@ public class EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlBody, true);
-        helper.setFrom(from);
+        helper.setFrom((from != null && !from.isEmpty()) ? from : "dasomdmu@gmail.com");
+
+        // Content-Type을 명시적으로 설정
+        message.setContent(htmlBody, "text/html; charset=utf-8");
 
         javaMailSender.send(message);
     }

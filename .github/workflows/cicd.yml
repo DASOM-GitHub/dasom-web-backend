@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: SSH to Server and Deploy
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_SERVER_HOST }}

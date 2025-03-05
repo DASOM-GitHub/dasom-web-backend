@@ -1,4 +1,4 @@
-package dmu.dasom.api.domain.email.enums;
+package dmu.dasom.api.domain.google.enums;
 
 public enum MailType {
     DOCUMENT_RESULT, // 서류 합격

@@ -18,8 +18,26 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache Gradle Build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ${{ runner.os }}-gradle-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-build-
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build --build-cache

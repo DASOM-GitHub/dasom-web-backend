@@ -31,7 +31,7 @@ public class EmailService {
         // 메일 제목 및 템플릿 설정
         String subject;
         String emailContent;
-        String buttonUrl = "https://dmu-dasom.netlify.app/recruit/result";
+        String buttonUrl = "https://dmu-dasom.or.kr/recruit/result";
         String buttonText;
 
         switch (mailType) {

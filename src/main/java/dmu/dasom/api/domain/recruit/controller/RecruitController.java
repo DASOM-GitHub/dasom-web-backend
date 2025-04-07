@@ -44,7 +44,10 @@ public class RecruitController {
                 examples = {
                     @ExampleObject(
                         name = "학번 중복",
-                        value = "{ \"code\": \"C013\", \"message\": \"이미 등록된 학번입니다.\" }")
+                        value = "{ \"code\": \"C013\", \"message\": \"이미 등록된 학번입니다.\" }"),
+                    @ExampleObject(
+                        name = "모집 기간 아님",
+                        value = "{ \"code\": \"C029\", \"message\": \"모집 기간이 아닙니다.\" }")
                 }))
     })
     @PostMapping("/apply")
@@ -78,7 +81,7 @@ public class RecruitController {
     })
     @GetMapping("/result")
     public ResponseEntity<ResultCheckResponseDto> checkResult(@ModelAttribute final ResultCheckRequestDto request) {
-        return ResponseEntity.ok(recruitService.checkResult(request));
+        return ResponseEntity.ok(applicantService.checkResult(request));
     }
 
     // 면접 일정 생성

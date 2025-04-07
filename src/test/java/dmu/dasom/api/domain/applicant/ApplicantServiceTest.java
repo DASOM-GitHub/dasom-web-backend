@@ -13,6 +13,10 @@ import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.email.enums.MailType;
 import dmu.dasom.api.domain.email.service.EmailService;
 import dmu.dasom.api.domain.google.service.GoogleApiService;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
+import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
+import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
+import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
 import dmu.dasom.api.global.dto.PageResponse;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +48,9 @@ class ApplicantServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private RecruitServiceImpl recruitService;
+
     @InjectMocks
     private ApplicantServiceImpl applicantService;
 
@@ -61,6 +68,7 @@ class ApplicantServiceTest {
         // given
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
         when(request.getStudentNo()).thenReturn("20210000");
+        when(recruitService.isRecruitmentActive()).thenReturn(true);
 
         Applicant mockApplicant = Applicant.builder()
                 .name("홍길동")
@@ -100,6 +108,7 @@ class ApplicantServiceTest {
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
         when(request.getStudentNo()).thenReturn("20210000");
         when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(mock(Applicant.class)));
+        when(recruitService.isRecruitmentActive()).thenReturn(true);
         when(request.getIsOverwriteConfirmed()).thenReturn(false);
 
         // when
@@ -120,6 +129,7 @@ class ApplicantServiceTest {
         when(request.getStudentNo()).thenReturn("20210000");
         Applicant existingApplicant = mock(Applicant.class); // 기존 Applicant 객체 모킹
         when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(existingApplicant));
+        when(recruitService.isRecruitmentActive()).thenReturn(true);
         when(request.getIsOverwriteConfirmed()).thenReturn(true);
 
         // when
@@ -334,6 +344,7 @@ class ApplicantServiceTest {
         // given
         ApplicantCreateRequestDto request = mock(ApplicantCreateRequestDto.class);
         when(request.getStudentNo()).thenReturn("20210000");
+        when(recruitService.isRecruitmentActive()).thenReturn(true);
 
         Applicant existingApplicant = mock(Applicant.class); // 기존 Applicant 객체 모킹
         when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(existingApplicant));
@@ -346,6 +357,91 @@ class ApplicantServiceTest {
         // then
         verify(existingApplicant).overwrite(request);
         verify(googleApiService).updateSheet(List.of(existingApplicant));
+    }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 성공")
+    void checkResult_success() {
+        // given
+        LocalDateTime pastDateTime = LocalDateTime.now().minusHours(1);
+        when(recruitService.getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS)).thenReturn(pastDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(request.getContactLastDigit()).thenReturn("1234");
+
+        Applicant applicant = mock(Applicant.class);
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(applicant));
+
+        ApplicantDetailsResponseDto responseDto = mock(ApplicantDetailsResponseDto.class);
+        when(responseDto.getContact()).thenReturn("010-5678-1234");
+        when(responseDto.getStatus()).thenReturn(ApplicantStatus.DOCUMENT_PASSED);
+        when(responseDto.getStudentNo()).thenReturn("20210000");
+        when(responseDto.getName()).thenReturn("TestName");
+
+        when(applicant.toApplicantDetailsResponse()).thenReturn(responseDto);
+
+        when(recruitService.generateReservationCode("20210000", "1234")).thenReturn("202100001234");
+
+        // when
+        ResultCheckResponseDto result = applicantService.checkResult(request);
+
+        // then
+        assertNotNull(result);
+        assertTrue(result.getIsPassed());
+        verify(recruitService).getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS);
+        verify(applicantRepository).findByStudentNo("20210000");
+    }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 실패 (확인 기간 아님)")
+    void checkResult_fail_inquiryPeriod() {
+        // given
+        LocalDateTime futureDateTime = LocalDateTime.now().plusHours(1);
+        when(recruitService.getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS)).thenReturn(futureDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            applicantService.checkResult(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.INVALID_INQUIRY_PERIOD, exception.getErrorCode());
+        verify(recruitService).getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS);
+    }
+
+    @Test
+    @DisplayName("합격 결과 확인 - 실패 (연락처 뒷자리 불일치)")
+    void checkResult_fail_contactMismatch() {
+        // given
+        LocalDateTime pastDateTime = LocalDateTime.now().minusHours(1);
+        when(recruitService.getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS)).thenReturn(pastDateTime);
+
+        ResultCheckRequestDto request = mock(ResultCheckRequestDto.class);
+        when(request.getType()).thenReturn(ResultCheckType.DOCUMENT_PASS);
+        when(request.getStudentNo()).thenReturn("20210000");
+        when(request.getContactLastDigit()).thenReturn("0000");
+
+        Applicant applicant = mock(Applicant.class);
+        when(applicantRepository.findByStudentNo("20210000")).thenReturn(Optional.of(applicant));
+
+        ApplicantDetailsResponseDto responseDto = mock(ApplicantDetailsResponseDto.class);
+        when(responseDto.getContact()).thenReturn("010-5678-1234");
+        when(applicant.toApplicantDetailsResponse()).thenReturn(responseDto);
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            applicantService.checkResult(request);
+        });
+
+        // then
+        assertEquals(ErrorCode.ARGUMENT_NOT_VALID, exception.getErrorCode());
+        verify(recruitService).getResultAnnouncementSchedule(ResultCheckType.DOCUMENT_PASS);
+        verify(applicantRepository).findByStudentNo("20210000");
     }
 
 }

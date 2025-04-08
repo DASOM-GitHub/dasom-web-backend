@@ -23,6 +23,9 @@ public class SomParticipantService {
             throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
         }
 
+        somParticipantRepository.findByStudentId(requestDto.getStudentId())
+                .orElseThrow(() -> new CustomException(ErrorCode.DUPLICATED_STUDENT_NO));
+
         SomParticipant participant = SomParticipant.builder()
                 .participantName(requestDto.getParticipantName())
                 .studentId(requestDto.getStudentId())
@@ -78,7 +81,7 @@ public class SomParticipantService {
      */
     public void deleteParticipant(Long id) {
         if (!somParticipantRepository.existsById(id)) {
-            throw new RuntimeException("참가자를 찾을 수 없습니다.");
+            throw new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT);
         }
         somParticipantRepository.deleteById(id);
     }

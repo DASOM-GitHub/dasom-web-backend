@@ -19,12 +19,8 @@ public class SomParticipantService {
 
     // 참가자 등록
     public SomParticipantResponseDto createParticipant(SomParticipantRequestDto requestDto) {
-        if(somParticipantRepository.findByStudentId(requestDto.getStudentId()).isPresent()) {
-            throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
-        }
 
-        somParticipantRepository.findByStudentId(requestDto.getStudentId())
-                .orElseThrow(() -> new CustomException(ErrorCode.DUPLICATED_STUDENT_NO));
+        validateDuplicatedStudentId(requestDto.getStudentId());
 
         SomParticipant participant = SomParticipant.builder()
                 .participantName(requestDto.getParticipantName())
@@ -53,36 +49,24 @@ public class SomParticipantService {
      * 특정 참가자 조회 (Read)
      */
     public SomParticipantResponseDto getParticipant(Long id){
-        SomParticipant participant = somParticipantRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT));
+        SomParticipant participant = findParticipantById(id);
 
         return toResponseDto(participant);
     }
 
     public SomParticipantResponseDto updateParticipant(Long id, SomParticipantRequestDto requestDto){
-        SomParticipant participant = somParticipantRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT));
+        SomParticipant participant = findParticipantById(id);
 
-        participant = SomParticipant.builder()
-                .id(participant.getId())
-                .participantName(requestDto.getParticipantName())
-                .studentId(requestDto.getStudentId())
-                .department(requestDto.getDepartment())
-                .grade(requestDto.getGrade())
-                .contact(requestDto.getContact())
-                .email(requestDto.getEmail())
-                .build();
+        participant.update(requestDto);
 
-        SomParticipant updated = somParticipantRepository.save(participant);
-
-        return toResponseDto(updated);
+        return toResponseDto(participant);
     }
 
     /**
      * 참가자 삭제 (Delete)
      */
     public void deleteParticipant(Long id) {
-        if (!somParticipantRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT);
-        }
+        findParticipantById(id);
         somParticipantRepository.deleteById(id);
     }
 
@@ -100,5 +84,19 @@ public class SomParticipantService {
                 .contact(participant.getContact())
                 .email(participant.getEmail())
                 .build();
+    }
+
+    /**
+     * ID로 참가자 조회 (공통 처리)
+     */
+    private SomParticipant findParticipantById(Long id) {
+        return somParticipantRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT));
+    }
+
+    private void validateDuplicatedStudentId(String studentId) {
+        if (somParticipantRepository.findByStudentId(studentId).isPresent()) {
+            throw new CustomException(ErrorCode.DUPLICATED_STUDENT_NO);
+        }
     }
 }

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/somkathon/participants")
 @RequiredArgsConstructor
+@Validated
 public class SomParticipantController {
 
     private final SomParticipantService somParticipantService;
@@ -45,8 +47,7 @@ public class SomParticipantController {
                                     )}))})
     @PostMapping("/create")
     public ResponseEntity<SomParticipantResponseDto> create(@Valid @RequestBody final SomParticipantRequestDto request) {
-        final SomParticipantResponseDto responseDto = somParticipantService.createParticipant(request);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(somParticipantService.createParticipant(request));
     }
 
     /**
@@ -57,8 +58,7 @@ public class SomParticipantController {
             @ApiResponse(responseCode = "200", description = "참가자 목록 조회 성공")})
     @GetMapping
     public ResponseEntity<List<SomParticipantResponseDto>> findAll() {
-        final List<SomParticipantResponseDto> participants = somParticipantService.getAllParticipants();
-        return ResponseEntity.ok(participants);
+        return ResponseEntity.ok(somParticipantService.getAllParticipants());
     }
 
     /**
@@ -77,8 +77,7 @@ public class SomParticipantController {
                                             value="{\"code\":\"C004\",\"message\":\"참가자를 찾을 수 없습니다.\"}")}))})
     @GetMapping("/{id}")
     public ResponseEntity<SomParticipantResponseDto> getById(@PathVariable final Long id) {
-        final SomParticipantResponseDto responseDto = somParticipantService.getParticipant(id);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(somParticipantService.getParticipant(id));
     }
 
     /**
@@ -101,8 +100,7 @@ public class SomParticipantController {
     @PutMapping("/{id}")
     public ResponseEntity<SomParticipantResponseDto> update(@PathVariable final Long id,
                                                             @Valid @RequestBody final SomParticipantRequestDto request) {
-        final SomParticipantResponseDto responseDto = somParticipantService.updateParticipant(id, request);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(somParticipantService.updateParticipant(id, request));
     }
 
     /**

@@ -1,4 +1,4 @@
-package dmu.dasom.api.domain.interview.repositoty;
+package dmu.dasom.api.domain.interview.repository;
 
 import dmu.dasom.api.domain.interview.entity.InterviewSlot;
 import dmu.dasom.api.domain.interview.enums.InterviewStatus;

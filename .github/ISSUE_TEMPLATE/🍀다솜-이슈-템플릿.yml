@@ -1,0 +1,42 @@
+name: "🍀다솜-이슈-템플릿"
+description: "해당 이슈 생성 템플릿으로 작성해주세요! (2025.08.08 update)"
+labels: [FEAT]
+title: "[feat] 개발 타이틀"
+body:
+  - type: input
+    id: parentKey
+    attributes:
+      label: "🎟️ 상위 작업 (Ticket Number)"
+      description: "상위 작업의 Ticket Number를 기입해주세요"
+      placeholder: "DASOMFE-00 또는 DASOMBE-00"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: projectKey
+    attributes:
+      label: "📦 프로젝트"
+      description: "이슈를 생성할 Jira 프로젝트를 선택하세요"
+      options:
+        - DASOMFE
+        - DASOMBE
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: "🎯 목적(Purpose)"
+      description: "해당 Issue가 발생한 원인과 배경을 설명한다."
+      placeholder: "예: 회원 기능 구현을 위한 로그인 기능 추가 필요"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "📝 상세 내용(Description)"
+      description: "구현할 기능 또는 수정 사항에 대한 구체적인 설명"
+      placeholder: "예: 이메일 및 비밀번호 입력값 검증 로직 추가, OAuth 연동 검토"
+    validations:
+      required: true

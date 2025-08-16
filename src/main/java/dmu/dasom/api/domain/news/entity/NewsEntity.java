@@ -52,6 +52,7 @@ public class NewsEntity extends BaseEntity {
         return NewsListResponseDto.builder()
             .id(this.id)
             .title(this.title)
+            .content(this.content)
             .createdAt(getCreatedAt())
             .image(file)
             .build();

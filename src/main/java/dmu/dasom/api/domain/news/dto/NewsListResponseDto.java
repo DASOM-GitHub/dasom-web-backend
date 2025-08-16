@@ -22,6 +22,9 @@ public class NewsListResponseDto {
     @Schema(description = "뉴스 제목", example = "제목")
     private String title;
 
+    @Schema(description = "뉴스 내용", example = "내용")
+    private String content;
+
     @Schema(description = "작성일", example = "2025-02-14T12:00:00")
     private LocalDateTime createdAt;
 

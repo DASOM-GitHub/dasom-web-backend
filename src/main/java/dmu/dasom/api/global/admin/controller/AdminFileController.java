@@ -1,4 +1,4 @@
-package dmu.dasom.api.global.file.controller;
+package dmu.dasom.api.global.admin.controller;
 
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/api/admin/files")
 @RequiredArgsConstructor
-public class FileController {
+@Tag(name = "ADMIN - File API", description = "어드민 파일 관리 API")
+public class AdminFileController {
 
     private final FileService fileService;
 

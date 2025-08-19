@@ -31,6 +31,8 @@ public class EmailService {
 
     @Async
     public void sendEmail(String to, String name, MailType mailType) {
+        MailSendStatus mailSendStatus = MailSendStatus.SUCCESS;
+        String errorMessage = null;
         try {
             if (mailType == null) {
                 throw new CustomException(ErrorCode.MAIL_TYPE_NOT_VALID);
@@ -63,13 +65,15 @@ public class EmailService {
 
             javaMailSender.send(message);
             log.info("Email sent successfull {}", to);
-            emailLogService.logEmailSending(to, MailSendStatus.SUCCESS, null);
         } catch (MessagingException e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
-            emailLogService.logEmailSending(to, MailSendStatus.FAILURE, e.getMessage());
+            mailSendStatus = MailSendStatus.FAILURE;
+            errorMessage = e.getMessage();
         } catch (CustomException e) {
             log.error("Email sending error for {}: {}", to, e.getMessage());
-            emailLogService.logEmailSending(to, MailSendStatus.FAILURE, e.getMessage());
+            mailSendStatus = MailSendStatus.FAILURE;
+            errorMessage = e.getMessage();
         }
+        emailLogService.logEmailSending(to, mailSendStatus, errorMessage);
     }
 }

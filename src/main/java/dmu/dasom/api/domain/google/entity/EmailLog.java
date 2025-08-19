@@ -29,4 +29,12 @@ public class EmailLog {
 
     @CreationTimestamp
     private LocalDateTime sentAt;
+
+    public static EmailLog of(String recipientEmail, MailSendStatus status, String errorMessage) {
+        return EmailLog.builder()
+                .recipientEmail(recipientEmail)
+                .status(status)
+                .errorMessage(errorMessage)
+                .build();
+    }
 }

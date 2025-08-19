@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>이메일 안내</title>
+</head>
+<body style="
+            background-color: #17171B;
+            color: white !important;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;">
+<div style="
+            width: 740px;
+            height: 680px;
+            background: #17171B;
+            padding: 30px;
+            position: relative;">
+    <div style="
+            display: flex;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 20px;">
+        <div style="
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;">
+            <div style="
+                flex: 1;
+                border-top: 1px solid #00B493;
+                margin: 0 10px;">
+
+            </div>
+            <img src="https://dmu-dasom.or.kr/static/media/dasomLogo.c82d220d8093c3cb8d7fc0b148cafcd1.svg" alt="로고" style="
+            width: 21px;
+            height: 24px;
+            border-radius: 3px;">
+            <div style="
+            flex: 1;
+            border-top: 1px solid #00B493;
+            margin: 0 10px;">
+            </div>
+        </div>
+    </div>
+
+    <div style="
+            font-size: 48px;
+            font-weight: 900;
+            color: #00B493;
+            margin-bottom: 30px;">
+        DASOM
+    </div>
+    <div style="
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white !important;"
+            th:text="${name} + '님 안녕하세요.'">
+    </div>
+    <div style="
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white !important;">
+        컴퓨터공학부 전공동아리 다솜입니다.
+    </div>
+
+    <div style="
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 2.5;
+            text-align: right;
+            margin-bottom: 40px;
+            color: white !important;">
+        먼저 다솜 35기에 많은 관심을 두고 지원해 주셔서 감사드리며,<br>
+        최종 면접 결과 및 추후 일정에 관해 안내해드리고자 이메일을 발송하게 되었습니다.<br>
+        최종 면접 결과는 아래 버튼 혹은 홈페이지를 통해 확인이 가능합니다.
+    </div>
+
+    <div style="display: flex;
+            justify-content: flex-end;
+            margin-bottom: 40px;">
+        <a th:href="${buttonUrl}"
+            style="
+            background: #00B493;
+            color: white !important;
+            font-size: 16px;
+            font-weight: 400;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;">
+            <span>최종 결과 확인하기</span>
+            <span style="
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 5px;
+            transform: rotate(-45deg);
+            margin-left: 10px;">
+            </span>
+        </a>
+    </div>
+
+    <div style="font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: white !important;">
+        또한, 문의 사항은 본 메일에 회신 또는 아래 번호로 편하게 연락 부탁드립니다.<br>
+        010-6361-3481
+    </div>
+</div>
+</body>
+</html>

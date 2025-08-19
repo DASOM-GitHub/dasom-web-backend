@@ -1,9 +1,10 @@
 package dmu.dasom.api.domain.email;
 
 
+import dmu.dasom.api.domain.google.enums.MailTemplate;
 import dmu.dasom.api.domain.google.enums.MailType;
+import dmu.dasom.api.domain.google.service.EmailLogService;
 import dmu.dasom.api.domain.google.service.EmailService;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +19,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -28,70 +28,60 @@ class EmailServiceTest {
     private JavaMailSender javaMailSender;
     @Mock
     private TemplateEngine templateEngine;
+    @Mock
+    private EmailLogService emailLogService;
     @InjectMocks
     private EmailService emailService;
 
     @BeforeEach
-    void setUp(){
+    void setUp() throws Exception{
         MockitoAnnotations.openMocks(this);
+
+        MimeMessage mimeMessage = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
+
+        doNothing().when(mimeMessage).setSubject(anyString(), anyString());
         ReflectionTestUtils.setField(emailService, "from", "test_email@example.com");
+    }
+
+    private void testSendEmailSuccess(MailType mailType) throws Exception {
+        // given
+        String to = "applicant@example.com";
+        String name = "지원자";
+        MailTemplate expectedTemplate = MailTemplate.getMailType(mailType);
+        String expectedHtmlBody = "<html><body>Test HTML for " + mailType + "</body></html>";
+
+        when(templateEngine.process(eq(expectedTemplate.getTemplateName()), any(Context.class))).thenReturn(expectedHtmlBody);
+
+        //when
+        emailService.sendEmail(to, name, mailType);
+
+        // then
+        // 비동기 처리를 위해 잠시 대기 후 검증
+        ArgumentCaptor<MimeMessage> messageCaptor = ArgumentCaptor.forClass(MimeMessage.class);
+        verify(javaMailSender, timeout(1000)).send(messageCaptor.capture());
+
+        ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
+        verify(templateEngine).process(eq(expectedTemplate.getTemplateName()), contextCaptor.capture());
+        Context capturedContext = contextCaptor.getValue();
+
+        assertEquals(name, capturedContext.getVariable("name"));
+        assertEquals("https://dmu-dasom.or.kr/recruit/result", capturedContext.getVariable("buttonUrl"));
+
+        MimeMessage capturedMessage = messageCaptor.getValue();
+        verify(capturedMessage).setSubject(expectedTemplate.getSubject(), "UTF-8");
     }
 
     @Test
     @DisplayName("성공 - 서류 결과 메일 발송 테스트")
-    void sendDocumentResultMessage_Success() throws MessagingException {
-        // given
-        String to = "applicant@example.com";
-        String name = "지원자";
-        MailType mailType = MailType.DOCUMENT_RESULT;
-
-        String expectedHtmlBody = "<html><body>Test HTML</body></html>";
-        when(templateEngine.process(eq("email-template"), any(Context.class))).thenReturn(expectedHtmlBody);
-
-        // when
-        emailService.sendEmail(to, name, mailType);
-
-        //then
-        // 비동기 처리 확인
-        verify(javaMailSender, timeout(1000)).send(any(MimeMessage.class));
-        // 메일 전송 확인
-        ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
-        verify(templateEngine).process(eq("email-template"), contextCaptor.capture());
-        Context capturedContext = contextCaptor.getValue();
-
-        // context 변수 확인
-        assertEquals(name, capturedContext.getVariable("name"));
-        assertEquals("서류 결과 확인하기", capturedContext.getVariable("buttonText"));
-        assertNotNull(capturedContext.getVariable("emailContent"));
+    void sendDocumentResultMessage_Success() throws Exception {
+        testSendEmailSuccess(MailType.DOCUMENT_RESULT);
     }
 
     @Test
     @DisplayName("성공 - 최종 결과 메일 발송 테스트")
-    void sendFinalResultMessage_Success() throws MessagingException {
-        // given
-        String to = "applicant@example.com";
-        String name = "지원자";
-        MailType mailType = MailType.FINAL_RESULT;
-
-        String expectedHtmlBody = "<html><body>Test HTML</body></html>";
-        when(templateEngine.process(eq("email-template"), any(Context.class))).thenReturn(expectedHtmlBody);
-
-        // when
-        emailService.sendEmail(to, name, mailType);
-
-        //then
-        // 비동기 처리 확인
-        verify(javaMailSender, timeout(1000)).send(any(MimeMessage.class));
-        // 메일 전송 확인
-        ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
-        verify(templateEngine).process(eq("email-template"), contextCaptor.capture());
-        Context capturedContext = contextCaptor.getValue();
-
-        // context 변수 확인
-        assertEquals(name, capturedContext.getVariable("name"));
-        assertEquals("최종 결과 확인하기", capturedContext.getVariable("buttonText"));
-        assertNotNull(capturedContext.getVariable("emailContent"));
+    void sendFinalResultMessage_Success() throws Exception {
+        testSendEmailSuccess(MailType.FINAL_RESULT);
     }
 
     @Test
@@ -106,7 +96,6 @@ class EmailServiceTest {
 
         // then
         verify(javaMailSender, never()).send(any(MimeMessage.class));
+        verify(emailLogService, timeout(1000)).logEmailSending(eq(to), any(), any());
     }
-
-
 }

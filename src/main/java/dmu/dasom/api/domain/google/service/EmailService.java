@@ -63,6 +63,7 @@ public class EmailService {
 
             javaMailSender.send(message);
             log.info("Email sent successfull {}", to);
+            emailLogService.logEmailSending(to, MailSendStatus.SUCCESS, null);
         } catch (MessagingException e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
             emailLogService.logEmailSending(to, MailSendStatus.FAILURE, e.getMessage());

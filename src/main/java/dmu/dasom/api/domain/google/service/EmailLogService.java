@@ -15,7 +15,11 @@ public class EmailLogService {
 
     @Async
     public void logEmailSending(String recipientEmail, MailSendStatus status, String errorMessage) {
-        EmailLog emailLog = EmailLog.of(recipientEmail, status, errorMessage);
+        EmailLog emailLog = EmailLog.builder()
+                        .recipientEmail(recipientEmail)
+                        .status(status)
+                        .errorMessage(errorMessage)
+                        .build();
         emailLogRepository.save(emailLog);
     }
 }

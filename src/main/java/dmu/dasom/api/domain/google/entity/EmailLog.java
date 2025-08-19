@@ -2,16 +2,16 @@ package dmu.dasom.api.domain.google.entity;
 
 import dmu.dasom.api.domain.google.enums.MailSendStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class EmailLog {
 
     @Id
@@ -29,13 +29,4 @@ public class EmailLog {
 
     @CreationTimestamp
     private LocalDateTime sentAt;
-
-    public static EmailLog of(String recipientEmail, MailSendStatus status, String errorMessage) {
-        EmailLog emailLog = new EmailLog();
-        emailLog.recipientEmail = recipientEmail;
-        emailLog.status = status;
-        emailLog.errorMessage = errorMessage;
-        return emailLog;
-    }
-
 }

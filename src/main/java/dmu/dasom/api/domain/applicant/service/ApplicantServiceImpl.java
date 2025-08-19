@@ -132,11 +132,7 @@ public class ApplicantServiceImpl implements ApplicantService {
         }
 
         for (Applicant applicant : applicants) {
-            try {
-                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
-            } catch (MessagingException e) {
-                System.err.println("Failed to send email to: " + applicant.getEmail());
-            }
+            emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
         }
     }
 

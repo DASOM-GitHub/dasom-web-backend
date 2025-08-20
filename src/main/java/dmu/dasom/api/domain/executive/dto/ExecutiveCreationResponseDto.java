@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(name = "executiveCreationResponseDto", description = "회장단 생성 응답 DTO")
-public class executiveCreationResponseDto {
+public class ExecutiveCreationResponseDto {
 
     @NotNull
     @Schema(description = "회장단 ID", example = "1")

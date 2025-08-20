@@ -25,4 +25,5 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Long> {
     Optional<Applicant> findByStudentNoAndContactEndsWith(@Param("studentNo") String studentNo,
                                                           @Param("contactLastDigits") String contactLastDigits);
 
+    Optional<Applicant> findByStudentNoAndEmail(String studentNo, String email);
 }

@@ -36,4 +36,8 @@ public class InterviewReservation {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt; // 생성
+
+    public void setSlot(InterviewSlot slot) {
+        this.slot = slot;
+    }
 }

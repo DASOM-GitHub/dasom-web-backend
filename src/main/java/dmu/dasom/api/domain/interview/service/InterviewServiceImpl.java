@@ -6,6 +6,7 @@ import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationApplicantResponseDto;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewReservationModifyRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 import dmu.dasom.api.domain.interview.entity.InterviewReservation;
 import dmu.dasom.api.domain.interview.entity.InterviewSlot;
@@ -148,7 +149,7 @@ public class InterviewServiceImpl implements InterviewService{
                 .toList();
     }
 
-    @Override
+        @Override
     public List<InterviewReservationApplicantResponseDto> getAllInterviewApplicants() {
         List<InterviewReservation> reservations = interviewReservationRepository.findAll();
 
@@ -172,4 +173,44 @@ public class InterviewServiceImpl implements InterviewService{
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public void modifyInterviewReservation(InterviewReservationModifyRequestDto request) {
+        // 1. 지원자 학번과 이메일로 지원자 조회 및 검증
+        Applicant applicant = applicantRepository.findByStudentNoAndEmail(request.getStudentNo(), request.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.APPLICANT_NOT_FOUND));
+
+        // 2. 해당 지원자의 기존 면접 예약 조회
+        InterviewReservation existingReservation = interviewReservationRepository.findByApplicant(applicant)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        // 3. 새로운 면접 슬롯 조회 및 검증
+        InterviewSlot newSlot = interviewSlotRepository.findById(request.getNewSlotId())
+                .orElseThrow(() -> new CustomException(ErrorCode.SLOT_NOT_FOUND));
+
+        // 4. 새로운 슬롯이 현재 예약된 슬롯과 동일한지 확인 (불필요한 업데이트 방지)
+        if (existingReservation.getSlot().getId().equals(newSlot.getId())) {
+            return; // 동일한 슬롯으로 변경 요청 시 아무것도 하지 않음
+        }
+
+        // 5. 새로운 슬롯의 가용성 확인
+        if (newSlot.getCurrentCandidates() >= newSlot.getMaxCandidates() || newSlot.getInterviewStatus() != InterviewStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.SLOT_UNAVAILABLE);
+        }
+
+        // 6. 기존 슬롯의 예약 인원 감소
+        InterviewSlot oldSlot = existingReservation.getSlot();
+        oldSlot.decrementCurrentCandidates();
+        interviewSlotRepository.save(oldSlot); // 변경된 oldSlot 저장
+
+        // 7. 예약 정보 업데이트 (새로운 슬롯으로 변경)
+        existingReservation.setSlot(newSlot); // InterviewReservation 엔티티에 setSlot 메서드가 없으므로 추가해야 함.
+
+        // 8. 새로운 슬롯의 예약 인원 증가
+        newSlot.incrementCurrentCandidates();
+        interviewSlotRepository.save(newSlot); // 변경된 newSlot 저장
+
+        // 9. 업데이트된 예약 정보 저장
+        interviewReservationRepository.save(existingReservation);
+    }
 }

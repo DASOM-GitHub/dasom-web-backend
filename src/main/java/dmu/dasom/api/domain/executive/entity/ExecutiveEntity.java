@@ -12,7 +12,7 @@ import lombok.*; // 보일러플레이트 코드 자동 생성 라이브러리
 @AllArgsConstructor
 @Builder
 @Schema(description = "조직도 엔티티")
-public class executiveEntity extends BaseEntity {
+public class ExecutiveEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

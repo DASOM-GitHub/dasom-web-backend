@@ -14,7 +14,7 @@ public class ExecutiveService {
 
     private final ExecutiveRepository executiveRepository;
 
-    // 회장단 멤버 생성
+    // 임원진 멤버 생성
     public ExecutiveCreationResponseDto createExecutive(ExecutiveRequestDto requestDto) {
         return new ExecutiveCreationResponseDto(executiveRepository.save(requestDto.toEntity()).getId());
     }

@@ -13,7 +13,9 @@ public interface RecruitService {
 
     List<RecruitConfigResponseDto> getRecruitSchedule();
 
-    void modifyRecruitSchedule(final RecruitScheduleModifyRequestDto requestDto);
+        void modifyRecruitSchedule(RecruitScheduleModifyRequestDto request);
+
+    void initRecruitSchedule();
 
     String generateReservationCode(String studentNo, String contactLastDigits);
 

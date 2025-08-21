@@ -18,7 +18,7 @@ public interface InterviewSlotRepository extends JpaRepository<InterviewSlot, Lo
 
     // 상태에 따른 슬롯 조회
     @Query("SELECT s FROM InterviewSlot s WHERE s.interviewStatus = :status AND s.currentCandidates < s.maxCandidates")
-    List<InterviewSlot> findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(InterviewStatus interviewStatus);
+        List<InterviewSlot> findAllByStatusAndCurrentCandidatesLessThanMaxCandidates(@org.springframework.data.repository.query.Param("status") InterviewStatus interviewStatus);
 
     // 슬롯이 하나라도 존재하는지 확인
     @Query("SELECT COUNT(s) > 0 FROM InterviewSlot s")

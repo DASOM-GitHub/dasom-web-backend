@@ -67,6 +67,20 @@ public class RecruitController {
         return ResponseEntity.ok(recruitService.getRecruitSchedule());
     }
 
+    @Operation(summary = "모집 일정 수정")
+    @PutMapping("/schedule")
+    public ResponseEntity<Void> modifyRecruitSchedule(@RequestBody dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto request) {
+        recruitService.modifyRecruitSchedule(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "TEMP: 모집 일정 초기화")
+    @GetMapping("/init-schedule")
+    public ResponseEntity<String> initSchedule() {
+        recruitService.initRecruitSchedule();
+        return ResponseEntity.ok("Recruit schedule initialized successfully.");
+    }
+
     // 합격 결과 확인
     @Operation(summary = "합격 결과 확인")
     @ApiResponses(value = {

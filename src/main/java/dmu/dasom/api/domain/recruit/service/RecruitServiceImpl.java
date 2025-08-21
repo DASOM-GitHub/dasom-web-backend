@@ -74,6 +74,21 @@ public class RecruitServiceImpl implements RecruitService {
         return parseDateTimeFormat(recruit.getValue());
     }
 
+    @Override
+    @Transactional
+    public void initRecruitSchedule() {
+        if (recruitRepository.count() > 0) {
+            return; // Already initialized
+        }
+        for (dmu.dasom.api.domain.recruit.enums.ConfigKey key : dmu.dasom.api.domain.recruit.enums.ConfigKey.values()) {
+            dmu.dasom.api.domain.recruit.entity.Recruit recruit = dmu.dasom.api.domain.recruit.entity.Recruit.builder()
+                    .key(key)
+                    .value("2025-01-01T00:00:00") // Default value
+                    .build();
+            recruitRepository.save(recruit);
+        }
+    }
+
     // DB에 저장된 모든 Recruit 객체를 찾아 반환
     private List<Recruit> findAll() {
         return recruitRepository.findAll();

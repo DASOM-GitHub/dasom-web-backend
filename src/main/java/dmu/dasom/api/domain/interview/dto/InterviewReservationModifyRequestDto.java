@@ -30,4 +30,8 @@ public class InterviewReservationModifyRequestDto {
     @NotNull(message = "새로운 슬롯 ID는 필수 값입니다.")
     @Schema(description = "새롭게 예약할 면접 슬롯의 ID", example = "2")
     private Long newSlotId;
+
+    @NotNull(message = "인증 코드는 필수 값입니다.")
+    @Schema(description = "이메일로 발송된 6자리 인증 코드", example = "123456")
+    private String verificationCode;
 }

@@ -14,6 +14,7 @@ import dmu.dasom.api.domain.interview.enums.InterviewStatus;
 import dmu.dasom.api.domain.interview.repository.InterviewReservationRepository;
 import dmu.dasom.api.domain.interview.repository.InterviewSlotRepository;
 import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
+import dmu.dasom.api.global.util.VerificationCodeManager;
 import jakarta.persistence.EntityListeners;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -36,6 +37,7 @@ public class InterviewServiceImpl implements InterviewService{
     private final InterviewReservationRepository interviewReservationRepository;
     private final ApplicantRepository applicantRepository;
     private final RecruitServiceImpl recruitService;
+    private final VerificationCodeManager verificationCodeManager;
 
     @Override
     @Transactional
@@ -176,6 +178,9 @@ public class InterviewServiceImpl implements InterviewService{
     @Override
     @Transactional
     public void modifyInterviewReservation(InterviewReservationModifyRequestDto request) {
+        // 0. 인증 코드 검증
+        verificationCodeManager.verifyCode(request.getStudentNo(), request.getVerificationCode());
+
         // 1. 지원자 학번과 이메일로 지원자 조회 및 검증
         Applicant applicant = applicantRepository.findByStudentNoAndEmail(request.getStudentNo(), request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.APPLICANT_NOT_FOUND));
@@ -204,7 +209,7 @@ public class InterviewServiceImpl implements InterviewService{
         interviewSlotRepository.save(oldSlot); // 변경된 oldSlot 저장
 
         // 7. 예약 정보 업데이트 (새로운 슬롯으로 변경)
-        existingReservation.setSlot(newSlot); // InterviewReservation 엔티티에 setSlot 메서드가 없으므로 추가해야 함.
+        existingReservation.setSlot(newSlot);
 
         // 8. 새로운 슬롯의 예약 인원 증가
         newSlot.incrementCurrentCandidates();

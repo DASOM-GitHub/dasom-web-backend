@@ -31,6 +31,15 @@ public class ExecutiveService {
         return new ExecutiveCreationResponseDto(executiveRepository.save(requestDto.toEntity()).getId());
     }
 
+    // 임원진 멤버 삭제
+    @Transactional
+    public void deleteExective(Long id) {
+        ExecutiveEntity executive = executiveRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Executive not found")); // 일단 에러 코드 출력 나중에 커스텀 에러코드 수정
+
+        executiveRepository.delete(executive);
+    }
+
     // 임원진 멤버 수정
     @Transactional
     public ExecutiveResponseDto updateExecutive(Long id, ExecutiveUpdateRequestDto requestDto) {

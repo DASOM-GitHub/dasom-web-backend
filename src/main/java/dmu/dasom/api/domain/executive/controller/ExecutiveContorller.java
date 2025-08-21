@@ -34,6 +34,15 @@ public class ExecutiveContorller {
         return ResponseEntity.status(201).body(executiveService.createExecutive(requestDto));
     }
 
+    @Operation(summary = "임원진 삭제")
+    @DeleteMapping("/{id}")
+    // Void 사용 이유?
+    // DELETE 요청 같이 성공/실패만 확인하면 되는 경우 사용
+    public ResponseEntity<Void> deleteExecutive(@PathVariable @Min(1) Long id) {
+        executiveService.deleteExective(id);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "임원진 수정")
     @PutMapping("/{id}")
     public ResponseEntity<ExecutiveResponseDto> updateExecutive(@PathVariable @Min(1) Long id,

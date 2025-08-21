@@ -2,6 +2,7 @@ package dmu.dasom.api.domain.executive.service;
 
 import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
+import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
 import dmu.dasom.api.domain.executive.entity.ExecutiveEntity;
 import dmu.dasom.api.domain.executive.repository.ExecutiveRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -11,9 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExecutiveServiceTest {
@@ -24,6 +27,33 @@ class ExecutiveServiceTest {
     // 생성자 주입
     @InjectMocks
     private ExecutiveService executiveService;
+
+    @Test
+    @DisplayName("임원진 멤버 조회 - 성공")
+    void getExecutiveById_success() {
+        // given
+        Long id = 1L;
+        ExecutiveEntity entity = ExecutiveEntity.builder()
+                .id(1L)
+                .name("김다솜")
+                .position("회장")
+                .githubUrl("https://github.com/dasom")
+                .build();
+
+        when(executiveRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        // when
+        ExecutiveResponseDto responseDto = executiveService.getExecutiveById(id);
+
+        // then
+        assertThat(responseDto.getId()).isEqualTo(id);
+        assertThat(responseDto.getName()).isEqualTo("김다솜");
+        assertThat(responseDto.getPosition()).isEqualTo("회장");
+        assertThat(responseDto.getGithubUrl()).isEqualTo("https://github.com/dasom");
+
+        // verify ( 호출 검증 )
+        verify(executiveRepository, times(1)).findById(id); // 메소드를 정확히 한 번만 호출했는지?
+    }
 
     @Test
     @DisplayName("임원진 멤버 생성 - 성공")

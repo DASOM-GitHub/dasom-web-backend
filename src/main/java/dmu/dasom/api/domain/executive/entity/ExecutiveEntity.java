@@ -23,10 +23,10 @@ public class ExecutiveEntity extends BaseEntity {
     private String name;
 
     // 직책
-    @Column(nullable=false, length=50)
+    @Column(nullable=false, length = 50)
     private String position;
 
     // 깃허브 주소
-    @Column(nullable=false, length=255)
+    @Column(nullable=false, length = 255)
     private String githubUrl;
 }

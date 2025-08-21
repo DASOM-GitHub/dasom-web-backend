@@ -82,6 +82,30 @@ class ExecutiveServiceTest {
     }
 
     @Test
+    @DisplayName("임원진 멤버 삭제 - 성공")
+    void deleteExecutive_success() {
+        // given
+        Long id = 1L;
+
+        ExecutiveEntity entity = ExecutiveEntity.builder()
+                .id(1L)
+                .name("김다솜")
+                .position("회장")
+                .githubUrl("https://github.com/dasom")
+                .build();
+
+        when(executiveRepository.findById(id)).thenReturn(Optional.of(entity));
+        doNothing().when(executiveRepository).delete(entity);
+
+        // when
+        executiveService.deleteExective(id);
+
+        // then
+        verify(executiveRepository, times(1)).findById(id);
+        verify(executiveRepository, times(1)).delete(entity);
+    }
+
+    @Test
     @DisplayName("임원진 멤버 수정 - 성공")
     void updateExecutive_success() {
 

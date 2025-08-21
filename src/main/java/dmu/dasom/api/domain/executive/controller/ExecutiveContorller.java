@@ -3,7 +3,9 @@ package dmu.dasom.api.domain.executive.controller;
 import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
+import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
 import dmu.dasom.api.domain.executive.service.ExecutiveService;
+import dmu.dasom.api.domain.news.dto.NewsUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,5 +32,12 @@ public class ExecutiveContorller {
     @PostMapping
     public ResponseEntity<ExecutiveCreationResponseDto> createExecutive(@Valid @RequestBody ExecutiveRequestDto requestDto) {
         return ResponseEntity.status(201).body(executiveService.createExecutive(requestDto));
+    }
+
+    @Operation(summary = "임원진 수정")
+    @PutMapping("/{id}")
+    public ResponseEntity<ExecutiveResponseDto> updateExecutive(@PathVariable @Min(1) Long id,
+                                                                @Valid @RequestBody ExecutiveUpdateRequestDto requestDto) {
+        return ResponseEntity.ok(executiveService.updateExecutive(id, requestDto));
     }
 }

@@ -3,6 +3,7 @@ package dmu.dasom.api.domain.executive.service;
 import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
+import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
 import dmu.dasom.api.domain.executive.entity.ExecutiveEntity;
 import dmu.dasom.api.domain.executive.repository.ExecutiveRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +32,13 @@ public class ExecutiveService {
     }
 
     // 임원진 멤버 수정
-    /*@Transactional
-    public ExecutiveResponseDto updateExecutive(ExecutiveRequestDto requestDto) {
-        return
-    }*/
+    @Transactional
+    public ExecutiveResponseDto updateExecutive(Long id, ExecutiveUpdateRequestDto requestDto) {
+        ExecutiveEntity executive = executiveRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Executive not found")); // 임시 에러 코드 출력 나중에 커스텀 에러코드로 수정
+
+        executive.update(requestDto.getName(), requestDto.getPosition(), requestDto.getGithubUrl());
+
+        return executive.toResponseDto();
+    }
 }

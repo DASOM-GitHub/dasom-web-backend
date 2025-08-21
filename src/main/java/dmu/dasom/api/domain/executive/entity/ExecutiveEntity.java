@@ -31,6 +31,13 @@ public class ExecutiveEntity extends BaseEntity {
     @Column(nullable=false, length = 255)
     private String githubUrl;
 
+    // 엔티티 업데이트 메소드
+    public void update(String name, String position, String githubUrl) {
+        this.name = name;
+        this.position = position;
+        this.githubUrl = githubUrl;
+    }
+
     // 엔티티 -> DTO 변환 책임
     public ExecutiveResponseDto toResponseDto() {
         return ExecutiveResponseDto.builder()

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/executives")
-public class ExecutiveContorller {
+public class ExecutiveController {
 
     private final ExecutiveService executiveService;
 

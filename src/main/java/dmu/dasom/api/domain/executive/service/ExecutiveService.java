@@ -1,5 +1,7 @@
 package dmu.dasom.api.domain.executive.service;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
@@ -21,7 +23,7 @@ public class ExecutiveService {
     // 이름, 직책, 깃허브 주소 검색
     public ExecutiveResponseDto getExecutiveById(Long id) {
         ExecutiveEntity executive = executiveRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Executive not found")); // 일단 에러 코드 출력 나중에 커스텀 에러코드로 수정
+                .orElseThrow(() -> new CustomException(ErrorCode.EXECUTIVE_NOT_FOUND));
 
         return executive.toResponseDto();
     }
@@ -35,7 +37,7 @@ public class ExecutiveService {
     @Transactional
     public void deleteExective(Long id) {
         ExecutiveEntity executive = executiveRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Executive not found")); // 일단 에러 코드 출력 나중에 커스텀 에러코드 수정
+                .orElseThrow(() -> new CustomException(ErrorCode.EXECUTIVE_NOT_FOUND));
 
         executiveRepository.delete(executive);
     }
@@ -44,7 +46,7 @@ public class ExecutiveService {
     @Transactional
     public ExecutiveResponseDto updateExecutive(Long id, ExecutiveUpdateRequestDto requestDto) {
         ExecutiveEntity executive = executiveRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Executive not found")); // 임시 에러 코드 출력 나중에 커스텀 에러코드로 수정
+                .orElseThrow(() -> new CustomException(ErrorCode.EXECUTIVE_NOT_FOUND));
 
         executive.update(requestDto.getName(), requestDto.getPosition(), requestDto.getGithubUrl());
 

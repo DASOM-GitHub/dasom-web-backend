@@ -5,7 +5,6 @@ import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
 import dmu.dasom.api.domain.executive.service.ExecutiveService;
-import dmu.dasom.api.domain.news.dto.NewsUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "EXECUTIVE API", description = "임원진 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/executive")
+@RequestMapping("/api/executives")
 public class ExecutiveContorller {
 
     private final ExecutiveService executiveService;

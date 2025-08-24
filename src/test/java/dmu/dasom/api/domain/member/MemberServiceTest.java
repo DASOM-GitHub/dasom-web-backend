@@ -6,6 +6,7 @@ import dmu.dasom.api.domain.member.dto.SignupRequestDto;
 import dmu.dasom.api.domain.member.entity.Member;
 import dmu.dasom.api.domain.member.repository.MemberRepository;
 import dmu.dasom.api.domain.member.service.MemberServiceImpl;
+import dmu.dasom.api.global.generation.service.GenerationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,9 @@ class MemberServiceTest {
 
     @Mock
     MemberRepository memberRepository;
+
+    @Mock
+    private GenerationService generationService;
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -101,12 +105,13 @@ class MemberServiceTest {
         when(request.getPassword()).thenReturn("password");
         when(encoder.encode("password")).thenReturn("encodedPassword");
         when(memberRepository.existsByEmail("test@example.com")).thenReturn(false);
-
+        when(generationService.getCurrentGeneration()).thenReturn("34기");
         // when
         memberService.signUp(request);
 
         // then
         verify(memberRepository, times(1)).save(any());
+        verify(generationService, times(1)).getCurrentGeneration();
     }
 
     @Test

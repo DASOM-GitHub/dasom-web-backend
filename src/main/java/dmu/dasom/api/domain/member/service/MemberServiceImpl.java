@@ -8,6 +8,7 @@ import dmu.dasom.api.domain.member.repository.MemberRepository;
 import dmu.dasom.api.global.auth.dto.TokenBox;
 import dmu.dasom.api.global.auth.jwt.JwtUtil;
 import dmu.dasom.api.global.auth.userdetails.UserDetailsImpl;
+import dmu.dasom.api.global.generation.service.GenerationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,6 +26,7 @@ public class MemberServiceImpl implements MemberService {
     private final BCryptPasswordEncoder encoder;
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
+    private final GenerationService generationService;
 
     // 이메일로 사용자 조회
     @Override
@@ -46,8 +48,9 @@ public class MemberServiceImpl implements MemberService {
         if (checkByEmail(request.getEmail()))
             throw new CustomException(ErrorCode.SIGNUP_FAILED);
 
-        // 비밀번호 암호화 후 저장
-        memberRepository.save(request.toEntity(encoder.encode(request.getPassword())));
+        String currentGeneration = generationService.getCurrentGeneration();
+        // 비밀번호 암호화 후 저장 + 기수도 현재 기수로 자동 기입
+        memberRepository.save(request.toEntity(encoder.encode(request.getPassword()), currentGeneration));
     }
 
     // 토큰 갱신

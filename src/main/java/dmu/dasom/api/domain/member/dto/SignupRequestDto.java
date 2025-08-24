@@ -22,10 +22,11 @@ public class SignupRequestDto {
     @Schema(description = "비밀번호", example = "password", minLength = 8, maxLength = 128)
     private String password;
 
-    public Member toEntity(final String password) {
+    public Member toEntity(final String password, final String generation) {
         return Member.builder()
                 .email(this.email)
                 .password(password)
+                .generation(generation)
                 .build();
     }
 }

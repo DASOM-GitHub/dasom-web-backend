@@ -8,6 +8,7 @@ import dmu.dasom.api.domain.recruit.entity.Recruit;
 import dmu.dasom.api.domain.recruit.enums.ConfigKey;
 import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
 import dmu.dasom.api.domain.recruit.repository.RecruitRepository;
+import dmu.dasom.api.global.generation.service.GenerationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +25,26 @@ import java.util.List;
 public class RecruitServiceImpl implements RecruitService {
 
     private final RecruitRepository recruitRepository;
+    private final GenerationService generationService;
 
     // 모집 일정 설정 조회
     @Override
     public List<RecruitConfigResponseDto> getRecruitSchedule() {
         return findAll().stream()
-            .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
-                ? config.toTimeResponse() : config.toResponse())
-            .toList();
+                .map(config -> {
+                    if(config.getKey() == ConfigKey.GENERATION) { //기수 조회 추가
+                        String currentGeneration = generationService.getCurrentGeneration();
+                        return RecruitConfigResponseDto.builder()
+                                .key(ConfigKey.GENERATION)
+                                .value(currentGeneration)
+                                .build();
+                    } else if(config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END) {
+                        return config.toTimeResponse();
+                    } else {
+                        return config.toResponse();
+                    }
+                })
+                .toList();
     }
 
     // 모집 일정 설정 수정
@@ -45,9 +58,13 @@ public class RecruitServiceImpl implements RecruitService {
             config.updateTime(time);
             return;
         }
-
-        final LocalDateTime dateTime = parseDateTimeFormat(request.getValue());
-        config.updateDateTime(dateTime);
+        else {
+            final LocalDateTime dateTime = parseDateTimeFormat(request.getValue());
+            config.updateDateTime(dateTime);
+        }
+        final Recruit generationConfig = findByKey(ConfigKey.GENERATION);
+        String currentGeneration = generationService.getCurrentGeneration();
+        generationConfig.updateGeneration(currentGeneration);
     }
 
     // 모집 기간 여부 확인

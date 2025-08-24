@@ -27,7 +27,7 @@ class ExecutiveServiceTest {
 
     // 생성자 주입
     @InjectMocks
-    private ExecutiveService executiveService;
+    private ExecutiveServiceImpl executiveService;
 
     @Test
     @DisplayName("임원진 멤버 조회 - 성공")

@@ -4,7 +4,7 @@ import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
-import dmu.dasom.api.domain.executive.service.ExecutiveService;
+import dmu.dasom.api.domain.executive.service.ExecutiveServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/executives")
 public class ExecutiveController {
 
-    private final ExecutiveService executiveService;
+    private final ExecutiveServiceImpl executiveService;
 
     @Operation(summary = "임원진 조회")
     @GetMapping("/{id}")

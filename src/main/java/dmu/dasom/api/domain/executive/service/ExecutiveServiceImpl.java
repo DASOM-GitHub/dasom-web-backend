@@ -2,15 +2,15 @@ package dmu.dasom.api.domain.executive.service;
 
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
-import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
-import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
-import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
-import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
+import dmu.dasom.api.domain.executive.dto.*;
 import dmu.dasom.api.domain.executive.entity.ExecutiveEntity;
 import dmu.dasom.api.domain.executive.repository.ExecutiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,20 @@ public class ExecutiveServiceImpl implements ExecutiveService {
                 .orElseThrow(() -> new CustomException(ErrorCode.EXECUTIVE_NOT_FOUND));
 
         return executive.toResponseDto();
+    }
+
+    // 임원진 전체 조회
+    // 이름, 직책, 깃허브 주소 출력
+    public List<ExecutiveListResponseDto> getAllExecutives() {
+        List<ExecutiveEntity> executives = executiveRepository.findAll();
+
+        List<Long> executiveIds = executives.stream()
+                .map(ExecutiveEntity::getId)
+                .toList();
+
+        return executives.stream()
+                .map(executiveEntity -> executiveEntity.toListResponseDto())
+                .toList();
     }
 
     // 임원진 멤버 생성

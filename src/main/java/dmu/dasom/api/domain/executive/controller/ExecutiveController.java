@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,12 +34,14 @@ public class ExecutiveController {
     }
 
     @Operation(summary = "임원진 생성")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ExecutiveCreationResponseDto> createExecutive(@Valid @RequestBody ExecutiveRequestDto requestDto) {
         return ResponseEntity.status(201).body(executiveService.createExecutive(requestDto));
     }
 
     @Operation(summary = "임원진 삭제")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     // Void 사용 이유?
     // DELETE 요청 같이 성공/실패만 확인하면 되는 경우 사용
@@ -48,6 +51,7 @@ public class ExecutiveController {
     }
 
     @Operation(summary = "임원진 수정")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ExecutiveResponseDto> updateExecutive(@PathVariable @Min(1) Long id,
                                                                 @Valid @RequestBody ExecutiveUpdateRequestDto requestDto) {

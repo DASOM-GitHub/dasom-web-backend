@@ -34,7 +34,7 @@ public enum ErrorCode {
     SLOT_FULL(400, "C025", "해당 슬롯이 가득 찼습니다."),
     RESERVATION_NOT_FOUND(400, "C026", "예약을 찾을 수 없습니다."),
     SLOT_NOT_ACTIVE(400, "C027", "해당 슬롯이 비활성화 되었습니다."),
-    FILE_ENCODE_FAIL(400, "C028", "파일 인코딩에 실패하였습니다."),
+    FILE_UPLOAD_FAIL(400, "C028", "파일 업로드에 실패하였습니다."),
     RECRUITMENT_NOT_ACTIVE(400, "C029", "모집 기간이 아닙니다."),
     NOT_FOUND_PARTICIPANT(400, "C030", "참가자를 찾을 수 없습니다.")
     ;

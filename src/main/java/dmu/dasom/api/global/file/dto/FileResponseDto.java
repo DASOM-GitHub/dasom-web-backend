@@ -15,12 +15,11 @@ public class FileResponseDto {
     @NotNull
     private Long id;
 
+    @Schema(description = "파일 URL", example = "url")
+    @NotNull
+    private String encodedData;   // r2에 저장된 파일의 URL
+
     @Schema(description = "파일 형식", example = "image/png")
     @NotNull
     private String fileFormat;
-
-    @Schema(description = "인코딩 된 파일", example = "base64encoded")
-    @NotNull
-    private String encodedData;   // Base64 인코딩 데이터
-
 }

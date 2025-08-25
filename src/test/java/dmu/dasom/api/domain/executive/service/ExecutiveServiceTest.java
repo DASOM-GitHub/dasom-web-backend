@@ -1,5 +1,7 @@
 package dmu.dasom.api.domain.executive.service;
 
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.executive.dto.ExecutiveCreationResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
@@ -12,10 +14,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -57,12 +62,28 @@ class ExecutiveServiceTest {
     }
 
     @Test
+    @DisplayName("임원진 멤버 조회 - 실패")
+    void getExecutiveById_fail() {
+        // given
+        Long id = 1L;
+        when(executiveRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            executiveService.getExecutiveById(1L);
+        });
+
+        // then
+        assertEquals(ErrorCode.EXECUTIVE_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
     @DisplayName("임원진 멤버 생성 - 성공")
     void createExecutive_success() {
         // given
         Long id = 1L;
         ExecutiveRequestDto dto = new ExecutiveRequestDto(
-                "김다솜", "회장", "https://github.com/dasom"
+                id, "김다솜", "회장", "https://github.com/dasom"
         );
 
         ExecutiveEntity entity = ExecutiveEntity.builder()
@@ -79,6 +100,13 @@ class ExecutiveServiceTest {
 
         // then
         assertThat(responseDto.getId()).isEqualTo(id);
+    }
+
+    @Test
+    @DisplayName("임원진 멤버 생성 - 실패_권한 없음")
+    @WithMockUser(roles = "MEMBER")
+    public void createExecutive_fail_authority() {
+
     }
 
     @Test

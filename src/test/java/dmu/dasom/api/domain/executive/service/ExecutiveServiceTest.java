@@ -134,6 +134,20 @@ class ExecutiveServiceTest {
     }
 
     @Test
+    @DisplayName("임원진 멤버 삭제 - 실패")
+    void deleteExecutive_fail() {
+        // given
+        Long id = 999L;
+        when(executiveRepository.findById(id)).thenReturn(Optional.empty());
+
+        // when
+        CustomException exception = assertThrows(CustomException.class, () -> {executiveService.deleteExective(id);});
+
+        // then
+        assertEquals(ErrorCode.EXECUTIVE_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
     @DisplayName("임원진 멤버 수정 - 성공")
     void updateExecutive_success() {
 

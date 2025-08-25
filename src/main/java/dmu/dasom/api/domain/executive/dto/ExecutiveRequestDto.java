@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "ExecutiveRequestDto", description = "임원진 생성 요청 DTO")
+@Schema(name = "ExecutiveRequestDto", description = "임원진 요청 DTO")
 public class ExecutiveRequestDto {
 
     @NotBlank(message = "임원진 이름은 필수 입력 사항입니다.")

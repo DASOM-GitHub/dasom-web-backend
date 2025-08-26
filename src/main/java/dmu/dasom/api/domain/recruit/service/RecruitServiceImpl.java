@@ -29,9 +29,9 @@ public class RecruitServiceImpl implements RecruitService {
     @Override
     public List<RecruitConfigResponseDto> getRecruitSchedule() {
         return findAll().stream()
-            .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
-                ? config.toTimeResponse() : config.toResponse())
-            .toList();
+                .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
+                        ? config.toTimeResponse() : config.toResponse())
+                .toList();
     }
 
     // 모집 일정 설정 수정
@@ -74,16 +74,25 @@ public class RecruitServiceImpl implements RecruitService {
         return parseDateTimeFormat(recruit.getValue());
     }
 
+    /*
+     * 모집 일정 초기화
+     * - DB에 Recruit 데이터가 존재하지 않을 경우 기본 값으로 초기화
+     * - 각 ConfigKey에 대해 Recruit 엔티티를 생성하여 저장
+     * - 기본 값은 "2025-01-01T00:00:00"으로 설정됨
+     */
     @Override
     @Transactional
     public void initRecruitSchedule() {
+        // 이미 데이터가 존재하면 초기화하지 않음
         if (recruitRepository.count() > 0) {
-            return; // Already initialized
+            return;
         }
-        for (dmu.dasom.api.domain.recruit.enums.ConfigKey key : dmu.dasom.api.domain.recruit.enums.ConfigKey.values()) {
-            dmu.dasom.api.domain.recruit.entity.Recruit recruit = dmu.dasom.api.domain.recruit.entity.Recruit.builder()
+
+        // 모든 ConfigKey를 순회하며 기본 Recruit 데이터 생성
+        for (ConfigKey key : ConfigKey.values()) {
+            Recruit recruit = Recruit.builder()
                     .key(key)
-                    .value("2025-01-01T00:00:00") // Default value
+                    .value("2025-01-01T00:00:00") // 초기 기본 값
                     .build();
             recruitRepository.save(recruit);
         }
@@ -97,8 +106,7 @@ public class RecruitServiceImpl implements RecruitService {
     // DB에서 key에 해당하는 Recruit 객체를 찾아 반환
     private Recruit findByKey(final ConfigKey key) {
         return recruitRepository.findByKey(key)
-            .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
-
+                .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
     }
 
     // 시간 형식 변환 및 검증
@@ -118,5 +126,4 @@ public class RecruitServiceImpl implements RecruitService {
             throw new CustomException(ErrorCode.INVALID_DATETIME_FORMAT);
         }
     }
-
 }

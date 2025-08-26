@@ -13,7 +13,7 @@ public interface RecruitService {
 
     List<RecruitConfigResponseDto> getRecruitSchedule();
 
-        void modifyRecruitSchedule(RecruitScheduleModifyRequestDto request);
+    void modifyRecruitSchedule(RecruitScheduleModifyRequestDto request);
 
     void initRecruitSchedule();
 

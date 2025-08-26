@@ -67,6 +67,11 @@ public class RecruitController {
         return ResponseEntity.ok(recruitService.getRecruitSchedule());
     }
 
+    /*
+     * 모집 일정 수정
+     * - 관리자가 모집 일정을 수정할 때 사용
+     * - RecruitService.modifyRecruitSchedule()을 호출하여 DB 반영
+     */
     @Operation(summary = "모집 일정 수정")
     @PutMapping("/schedule")
     public ResponseEntity<Void> modifyRecruitSchedule(@RequestBody dmu.dasom.api.domain.recruit.dto.RecruitScheduleModifyRequestDto request) {
@@ -74,12 +79,18 @@ public class RecruitController {
         return ResponseEntity.ok().build();
     }
 
+    /*
+     * 모집 일정 초기화 (테스트용)
+     * - 테스트 시 초기화를 위해 전체 모집 일정을 초기 상태로 되돌림
+     * - RecruitService.initRecruitSchedule()을 호출
+     */
     @Operation(summary = "TEMP: 모집 일정 초기화")
     @GetMapping("/init-schedule")
     public ResponseEntity<String> initSchedule() {
         recruitService.initRecruitSchedule();
         return ResponseEntity.ok("Recruit schedule initialized successfully.");
     }
+
 
     // 합격 결과 확인
     @Operation(summary = "합격 결과 확인")

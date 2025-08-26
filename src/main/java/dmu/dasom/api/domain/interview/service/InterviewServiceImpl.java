@@ -151,7 +151,7 @@ public class InterviewServiceImpl implements InterviewService{
                 .toList();
     }
 
-        @Override
+    @Override
     public List<InterviewReservationApplicantResponseDto> getAllInterviewApplicants() {
         List<InterviewReservation> reservations = interviewReservationRepository.findAll();
 

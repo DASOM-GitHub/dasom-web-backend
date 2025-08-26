@@ -1,7 +1,7 @@
 package dmu.dasom.api.domain.activity.controller;
 
-import dmu.dasom.api.domain.activity.dto.GroupedActivityHistoryDto;
-import dmu.dasom.api.domain.activity.service.ActivityHistoryService;
+import dmu.dasom.api.domain.activity.dto.ActivityResponseDto;
+import dmu.dasom.api.domain.activity.service.ActivityService;
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/activity/histories")
+@RequestMapping("/api/activities")
 @RequiredArgsConstructor
-@Tag(name = "Activity History API", description = "활동 연혁 API")
-public class ActivityHistoryController {
+@Tag(name = "Activity API", description = "활동 연혁 조회 API")
+public class ActivityController {
 
-    private final ActivityHistoryService historyService;
+    private final ActivityService activityService;
 
     @Operation(summary = "활동 연혁 전체 조회", description = "모든 활동 연혁을 연도별, 섹션별로 그룹화하여 조회합니다.")
     @ApiResponses(value = {
@@ -53,7 +53,7 @@ public class ActivityHistoryController {
                     ))
     })
     @GetMapping
-    public ResponseEntity<List<GroupedActivityHistoryDto>> getAllHistories() {
-        return ResponseEntity.ok(historyService.getAllHistories());
+    public ResponseEntity<List<ActivityResponseDto>> getActivities() {
+        return ResponseEntity.ok(activityService.getActivities());
     }
 }

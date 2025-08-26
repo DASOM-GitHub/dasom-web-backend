@@ -1,10 +1,8 @@
 server:
-  port: 8081
+  port: 8080
 spring:
   application:
     name: dasom-api
-  profiles:
-    active: credentials # 추가 (제외시키면 application-credentials.yml 못 찾음)
   servlet:
     multipart:
       enabled: true

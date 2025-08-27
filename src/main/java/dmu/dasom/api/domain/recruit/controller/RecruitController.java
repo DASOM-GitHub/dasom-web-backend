@@ -120,7 +120,7 @@ public class RecruitController {
                                     @ExampleObject(name = "슬롯 없음", value = "{ \"code\": \"C021\", \"message\": \"슬롯을 찾을 수 없습니다.\" }"),
                                     @ExampleObject(name = "이미 예약됨", value = "{ \"code\": \"C023\", \"message\": \"이미 예약된 지원자입니다.\" }"),
                                     @ExampleObject(name = "슬롯 가득 참", value = "{ \"code\": \"C025\", \"message\": \"해당 슬롯이 가득 찼습니다.\" }"),
-                                    @ExampleObject(name = "슬롯 불가", value = "{ \"code\": \"C032\", \"message\": \"해당 슬롯을 예약할 수 없습니다.\" }")
+                                    @ExampleObject(name = "슬롯 불가", value = "{ \"code\": \"C33\", \"message\": \"해당 슬롯을 예약할 수 없습니다.\" }")
                             }))
     })
     @PostMapping("/interview/reserve")

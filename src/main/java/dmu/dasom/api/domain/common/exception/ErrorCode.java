@@ -37,8 +37,9 @@ public enum ErrorCode {
     FILE_ENCODE_FAIL(400, "C028", "파일 인코딩에 실패하였습니다."),
     RECRUITMENT_NOT_ACTIVE(400, "C029", "모집 기간이 아닙니다."),
     NOT_FOUND_PARTICIPANT(400, "C030", "참가자를 찾을 수 없습니다."),
-    GENERATION_NOT_FOUND(400, "C031", "저장된 기수를 찾을 수 없습니다."),
-    INVALID_GENERATION_FORMAT(400, "C032", "유효하지 않은 기수 형식입니다. (예: '1기')");
+    EXECUTIVE_NOT_FOUND(400, "C031", "임원진을 찾을 수 없습니다."),
+    GENERATION_NOT_FOUND(400, "C032", "저장된 기수를 찾을 수 없습니다."),
+    INVALID_GENERATION_FORMAT(400, "C033", "유효하지 않은 기수 형식입니다. (예: '1기')");
 
     private final int status;
     private final String code;

@@ -62,7 +62,7 @@ public class ExecutiveServiceImpl implements ExecutiveService {
         ExecutiveEntity executive = executiveRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.EXECUTIVE_NOT_FOUND));
 
-        executive.update(requestDto.getName(), requestDto.getPosition(), requestDto.getGithubUrl());
+        executive.update(requestDto);
 
         return executive.toResponseDto();
     }

@@ -6,6 +6,7 @@ import dmu.dasom.api.domain.executive.dto.*;
 import dmu.dasom.api.domain.executive.entity.ExecutiveEntity;
 import dmu.dasom.api.domain.executive.repository.ExecutiveRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +32,13 @@ public class ExecutiveServiceImpl implements ExecutiveService {
     // 임원진 전체 조회
     // 이름, 직책, 깃허브 주소 출력
     public List<ExecutiveListResponseDto> getAllExecutives() {
-        List<ExecutiveEntity> executives = executiveRepository.findAll();
+        // 전체 조회 시 정렬
+        // 기준 sortOrder -> 직책 -> 이름
+        Sort sort = Sort.by(Sort.Direction.ASC, "sortOrder")
+                .and(Sort.by(Sort.Direction.ASC, "position"))
+                .and(Sort.by(Sort.Direction.DESC, "name"));
 
-        List<Long> executiveIds = executives.stream()
-                .map(ExecutiveEntity::getId)
-                .toList();
+        List<ExecutiveEntity> executives = executiveRepository.findAll(sort);
 
         return executives.stream()
                 .map(executiveEntity -> executiveEntity.toListResponseDto())

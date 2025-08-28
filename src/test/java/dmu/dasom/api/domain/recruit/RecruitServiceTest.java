@@ -17,7 +17,6 @@ import dmu.dasom.api.domain.recruit.enums.ConfigKey;
 import dmu.dasom.api.domain.recruit.enums.ResultCheckType;
 import dmu.dasom.api.domain.recruit.repository.RecruitRepository;
 import dmu.dasom.api.domain.recruit.service.RecruitServiceImpl;
-import dmu.dasom.api.global.generation.service.GenerationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,9 +46,6 @@ class RecruitServiceTest {
     @Mock
     private InterviewServiceImpl interviewService;
 
-    @Mock
-    private GenerationService generationService;
-
     @InjectMocks
     private RecruitServiceImpl recruitService;
 
@@ -59,21 +55,15 @@ class RecruitServiceTest {
         // given
         Recruit recruit1 = mock(Recruit.class);
         Recruit recruit2 = mock(Recruit.class);
-        Recruit recruit3 = mock(Recruit.class);
-        when(recruitRepository.findAll()).thenReturn(List.of(recruit1, recruit2, recruit3));
-        when(recruit1.getKey()).thenReturn(ConfigKey.RECRUITMENT_PERIOD_START);
-        when(recruit2.getKey()).thenReturn(ConfigKey.RECRUITMENT_PERIOD_END);
-        when(recruit3.getKey()).thenReturn(ConfigKey.GENERATION);
-        when(generationService.getCurrentGeneration()).thenReturn("34기");
+        when(recruitRepository.findAll()).thenReturn(List.of(recruit1, recruit2));
 
         // when
         List<RecruitConfigResponseDto> schedule = recruitService.getRecruitSchedule();
 
         // then
         assertNotNull(schedule);
-        assertEquals(3, schedule.size());
+        assertEquals(2, schedule.size());
         verify(recruitRepository, times(1)).findAll();
-        verify(generationService, times(1)).getCurrentGeneration();
     }
 
     @Test
@@ -81,20 +71,16 @@ class RecruitServiceTest {
     void modifyRecruitSchedule_success() {
         // given
         Recruit recruit = mock(Recruit.class);
-        Recruit generationRecruit = mock(Recruit.class);
         RecruitScheduleModifyRequestDto request = mock(RecruitScheduleModifyRequestDto.class);
         when(request.getKey()).thenReturn(ConfigKey.RECRUITMENT_PERIOD_START);
         when(request.getValue()).thenReturn("2025-01-02T12:00:00");
         when(recruitRepository.findByKey(ConfigKey.RECRUITMENT_PERIOD_START)).thenReturn(Optional.of(recruit));
-        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
-        when(generationService.getCurrentGeneration()).thenReturn("34기");
 
         // when
         recruitService.modifyRecruitSchedule(request);
 
         // then
         verify(recruit, times(1)).updateDateTime(LocalDateTime.of(2025, 1, 2, 12, 0, 0));
-        verify(generationRecruit, times(1)).updateGeneration("34기");
     }
 
     @Test
@@ -113,6 +99,36 @@ class RecruitServiceTest {
 
         // then
         assertEquals(ErrorCode.INVALID_TIME_FORMAT, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("모집 기수 수정")
+    void modifyGeneration_success() {
+        // given
+        Recruit generationRecruit = mock(Recruit.class);
+        String newGeneration = "35기";
+        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
+
+        // when
+        recruitService.modifyGeneration(newGeneration);
+
+        // then
+        verify(generationRecruit, times(1)).updateGeneration(newGeneration);
+    }
+
+    @Test
+    @DisplayName("기수 조회")
+    void getCurrentGeneration_success() {
+        // given
+        Recruit generationRecruit = mock(Recruit.class);
+        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
+        when(generationRecruit.getValue()).thenReturn("34기");
+        // when
+        String currentGeneration = recruitService.getCurrentGeneration();
+        // then
+        assertEquals("34기", currentGeneration);
+        verify(recruitRepository, times(1)).findByKey(ConfigKey.GENERATION);
+        verify(generationRecruit, times(1)).getValue();
     }
 
     @Test
@@ -209,42 +225,5 @@ class RecruitServiceTest {
         assertEquals(ErrorCode.ALREADY_RESERVED, exception.getErrorCode());
     }
 
-    @Test
-    @DisplayName("기수 정보 조회")
-    void getGenerationInfo() {
-        // given
-        Recruit generationRecruit = mock(Recruit.class);
-        when(recruitRepository.findAll()).thenReturn(List.of(generationRecruit));
-        when(generationRecruit.getKey()).thenReturn(ConfigKey.GENERATION);
-        when(generationService.getCurrentGeneration()).thenReturn("34기");
-
-        // when
-        List<RecruitConfigResponseDto> schedule = recruitService.getRecruitSchedule();
-        boolean generationFound = schedule.stream()
-                .anyMatch(dto -> dto.getKey() == ConfigKey.GENERATION);
-
-        // then
-        assertTrue(generationFound);
-        verify(generationService, times(1)).getCurrentGeneration();
-    }
-
-    @Test
-    @DisplayName("기수 정보 수정")
-    void modifyGenerationInfo() {
-        // given
-        Recruit generationRecruit = mock(Recruit.class);
-        RecruitScheduleModifyRequestDto request = mock(RecruitScheduleModifyRequestDto.class);
-        when(request.getKey()).thenReturn(ConfigKey.RECRUITMENT_PERIOD_START);
-        when(request.getValue()).thenReturn("2025-01-02T12:00:00");
-        when(recruitRepository.findByKey(ConfigKey.RECRUITMENT_PERIOD_START)).thenReturn(Optional.of(mock(Recruit.class)));
-        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
-        when(generationService.getCurrentGeneration()).thenReturn("34기");
-
-        // when
-        recruitService.modifyRecruitSchedule(request);
-
-        // then
-        verify(generationRecruit, times(1)).updateGeneration("34기");
-    }
 
 }

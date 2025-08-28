@@ -9,7 +9,8 @@ public enum Team {
     PRESIDENT("president"),
     TECH("tech"),
     ACADEMIC("academic"),
-    MANAGEMENT("management")
+    MANAGEMENT("management"),
+    PR("pr")
     ;
 
     private String name;

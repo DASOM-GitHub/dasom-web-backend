@@ -7,6 +7,7 @@ import dmu.dasom.api.domain.executive.dto.ExecutiveRequestDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveResponseDto;
 import dmu.dasom.api.domain.executive.dto.ExecutiveUpdateRequestDto;
 import dmu.dasom.api.domain.executive.entity.ExecutiveEntity;
+import dmu.dasom.api.domain.executive.enums.Team;
 import dmu.dasom.api.domain.executive.repository.ExecutiveRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,9 @@ class ExecutiveServiceTest {
                 .id(1L)
                 .name("김다솜")
                 .position("회장")
-                .githubUrl("https://github.com/dasom")
+                .role("동아리 운영 총괄")
+                .githubUsername("DASOM")
+                .team(Team.PRESIDENT)
                 .build();
 
         when(executiveRepository.findById(id)).thenReturn(Optional.of(entity));
@@ -55,7 +58,9 @@ class ExecutiveServiceTest {
         assertThat(responseDto.getId()).isEqualTo(id);
         assertThat(responseDto.getName()).isEqualTo("김다솜");
         assertThat(responseDto.getPosition()).isEqualTo("회장");
-        assertThat(responseDto.getGithubUrl()).isEqualTo("https://github.com/dasom");
+        assertThat(responseDto.getRole()).isEqualTo("동아리 운영 총괄");
+        assertThat(responseDto.getGithub_username()).isEqualTo("DASOM");
+        assertThat(responseDto.getTeam()).isEqualTo(Team.PRESIDENT);
 
         // verify ( 호출 검증 )
         verify(executiveRepository, times(1)).findById(id); // 메소드를 정확히 한 번만 호출했는지?
@@ -83,14 +88,22 @@ class ExecutiveServiceTest {
         // given
         Long id = 1L;
         ExecutiveRequestDto dto = new ExecutiveRequestDto(
-                id, "김다솜", "회장", "https://github.com/dasom"
+                id,
+                "김다솜",
+                "회장",
+                "동아리 운영 총괄",
+                "DASOM",
+                Team.PRESIDENT,
+                1
         );
 
         ExecutiveEntity entity = ExecutiveEntity.builder()
                 .id(1L)
                 .name("김다솜")
                 .position("회장")
-                .githubUrl("https://github.com/dasom")
+                .role("동아리 운영 총괄")
+                .githubUsername("DASOM")
+                .team(Team.PRESIDENT)
                 .build();
 
         when(executiveRepository.save(any(ExecutiveEntity.class))).thenReturn(entity);
@@ -119,7 +132,9 @@ class ExecutiveServiceTest {
                 .id(1L)
                 .name("김다솜")
                 .position("회장")
-                .githubUrl("https://github.com/dasom")
+                .role("동아리 운영 총괄")
+                .githubUsername("DASOM")
+                .team(Team.PRESIDENT)
                 .build();
 
         when(executiveRepository.findById(id)).thenReturn(Optional.of(entity));
@@ -158,10 +173,19 @@ class ExecutiveServiceTest {
                 .id(1L)
                 .name("김다솜")
                 .position("회장")
-                .githubUrl("https://github.com/dasom")
+                .role("동아리 운영 총괄")
+                .githubUsername("DASOM")
+                .team(Team.PRESIDENT)
                 .build();
 
-        ExecutiveUpdateRequestDto updateEntity = new ExecutiveUpdateRequestDto("김솜다", "부회장", "https://github.com/dasom");
+        ExecutiveUpdateRequestDto updateEntity = new ExecutiveUpdateRequestDto(
+                "김솜다",
+                "부회장",
+                "동아리 운영 총괄",
+                "MOSAD",
+                Team.ACADEMIC,
+                1
+        );
 
         when(executiveRepository.findById(id)).thenReturn(Optional.of(entity));
 
@@ -171,7 +195,9 @@ class ExecutiveServiceTest {
         //then
         assertThat(updateExecutive.getName()).isEqualTo("김솜다");
         assertThat(updateExecutive.getPosition()).isEqualTo("부회장");
-        assertThat(updateExecutive.getGithubUrl()).isEqualTo("https://github.com/dasom");
+        assertThat(updateExecutive.getRole()).isEqualTo("동아리 운영 총괄");
+        assertThat(updateExecutive.getGithub_username()).isEqualTo("MOSAD");
+        assertThat(updateExecutive.getTeam()).isEqualTo(Team.ACADEMIC);
 
         // verify ( 호출 검증 )
         verify(executiveRepository, times(1)).findById(id); // 메소드를 정확히 한 번만 호출했는지?

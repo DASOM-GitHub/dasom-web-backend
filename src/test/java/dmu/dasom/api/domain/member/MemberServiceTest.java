@@ -6,7 +6,7 @@ import dmu.dasom.api.domain.member.dto.SignupRequestDto;
 import dmu.dasom.api.domain.member.entity.Member;
 import dmu.dasom.api.domain.member.repository.MemberRepository;
 import dmu.dasom.api.domain.member.service.MemberServiceImpl;
-import dmu.dasom.api.global.generation.service.GenerationService;
+import dmu.dasom.api.domain.recruit.service.RecruitService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ class MemberServiceTest {
     MemberRepository memberRepository;
 
     @Mock
-    private GenerationService generationService;
+    RecruitService recruitService; // RecruitService 주입
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -96,23 +97,48 @@ class MemberServiceTest {
         assertFalse(result);
     }
 
+
     @Test
-    @DisplayName("회원가입 - 성공")
-    void signUp_success() {
-        // given
-        SignupRequestDto request = mock(SignupRequestDto.class);
-        when(request.getEmail()).thenReturn("test@example.com");
-        when(request.getPassword()).thenReturn("password");
+    @DisplayName("회원가입 - 기수 선택값 전달 시 사용")
+    void signUp_withGenerationProvided() {
+        // 실제 DTO 객체 사용
+        SignupRequestDto request = new SignupRequestDto();
+        // Reflection 또는 생성자/Setter로 값 설정
+        ReflectionTestUtils.setField(request, "email", "test@example.com");
+        ReflectionTestUtils.setField(request, "password", "password");
+        ReflectionTestUtils.setField(request, "generation", "35기");
+
         when(encoder.encode("password")).thenReturn("encodedPassword");
         when(memberRepository.existsByEmail("test@example.com")).thenReturn(false);
-        when(generationService.getCurrentGeneration()).thenReturn("34기");
-        // when
+
         memberService.signUp(request);
 
-        // then
-        verify(memberRepository, times(1)).save(any());
-        verify(generationService, times(1)).getCurrentGeneration();
+        verify(memberRepository, times(1)).save(argThat(member ->
+                "35기".equals(member.getGeneration())
+        ));
+        verify(recruitService, never()).getCurrentGeneration();
     }
+
+    @Test
+    @DisplayName("회원가입 - 기수 선택값 없으면 기본값 사용")
+    void signUp_withGenerationDefault() {
+        SignupRequestDto request = new SignupRequestDto();
+        ReflectionTestUtils.setField(request, "email", "test@example.com");
+        ReflectionTestUtils.setField(request, "password", "password");
+        ReflectionTestUtils.setField(request, "generation", null);
+
+        when(encoder.encode("password")).thenReturn("encodedPassword");
+        when(memberRepository.existsByEmail("test@example.com")).thenReturn(false);
+        when(recruitService.getCurrentGeneration()).thenReturn("34기");
+
+        memberService.signUp(request);
+
+        verify(memberRepository, times(1)).save(argThat(member ->
+                "34기".equals(member.getGeneration())
+        ));
+        verify(recruitService, times(1)).getCurrentGeneration();
+    }
+
 
     @Test
     @DisplayName("회원가입 - 실패")

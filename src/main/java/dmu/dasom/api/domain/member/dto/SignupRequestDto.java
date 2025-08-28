@@ -22,6 +22,10 @@ public class SignupRequestDto {
     @Schema(description = "비밀번호", example = "password", minLength = 8, maxLength = 128)
     private String password;
 
+    @Length(max = 4)
+    @Schema(description = "기수 (선택)", example = "34기", nullable = true)
+    private String generation;
+
     public Member toEntity(final String password, final String generation) {
         return Member.builder()
                 .email(this.email)

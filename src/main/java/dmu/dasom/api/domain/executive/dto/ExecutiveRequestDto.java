@@ -42,7 +42,10 @@ public class ExecutiveRequestDto {
         return ExecutiveEntity.builder()
                 .name(this.name)
                 .position(this.position)
-                .role
+                .role(this.role)
+                .githubUsername(this.github_username)
+                .team(this.team)
+                .sortOrder(this.sortOrder)
                 .build();
     }
 }

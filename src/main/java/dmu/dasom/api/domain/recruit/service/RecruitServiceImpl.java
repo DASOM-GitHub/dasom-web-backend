@@ -25,13 +25,13 @@ public class RecruitServiceImpl implements RecruitService {
 
     private final RecruitRepository recruitRepository;
 
-    // 모집 일정 설정 조회
+    // 모집 설정 조회
     @Override
     public List<RecruitConfigResponseDto> getRecruitSchedule() {
         return findAll().stream()
-            .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
-                ? config.toTimeResponse() : config.toResponse())
-            .toList();
+                .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
+                        ? config.toTimeResponse() : config.toResponse())
+                .toList();
     }
 
     // 모집 일정 설정 수정
@@ -50,6 +50,20 @@ public class RecruitServiceImpl implements RecruitService {
         config.updateDateTime(dateTime);
     }
 
+
+    //기수 수정
+    @Override
+    @Transactional
+    public void modifyGeneration(String newGeneration) {
+        final Recruit config = findByKey(ConfigKey.GENERATION);
+        config.updateGeneration(newGeneration);
+    }
+    // 기수 조회
+    @Override
+    public String getCurrentGeneration() {
+        Recruit generationConfig = findByKey(ConfigKey.GENERATION);
+        return generationConfig.getValue();
+    }
     // 모집 기간 여부 확인
     @Override
     public boolean isRecruitmentActive() {

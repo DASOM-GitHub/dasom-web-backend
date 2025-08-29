@@ -18,6 +18,7 @@ public enum ConfigKey {
     INTERVIEW_TIME_END,        // 면접 종료 시간
 
     // 2차 합격 발표일 (시간 포함)
-    INTERVIEW_PASS_ANNOUNCEMENT   // 2차 합격 발표일
+    INTERVIEW_PASS_ANNOUNCEMENT,   // 2차 합격 발표일
 
+    GENERATION     //현재 모집중인 기수 정보
 }

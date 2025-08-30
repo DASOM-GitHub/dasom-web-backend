@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/logout", "/api/auth/rotation").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtFilter, CustomAuthenticationFilter.class)
-                .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                
                 .addFilterAfter(new CustomLogoutFilter(jwtUtil), JwtFilter.class)
                 .exceptionHandling(handler -> handler
                         .accessDeniedHandler(accessDeniedHandler)

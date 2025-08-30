@@ -76,6 +76,7 @@ public class ExecutiveEntity extends BaseEntity {
                 .role(this.role)
                 .github_username(this.githubUsername)
                 .team(this.team)
+                .sortOrder(this.sortOrder)
                 .build();
     }
 
@@ -88,6 +89,7 @@ public class ExecutiveEntity extends BaseEntity {
                 .role(this.role)
                 .github_username(this.githubUsername)
                 .team(this.team)
+                .sortOrder(this.sortOrder)
                 .build();
     }
 }

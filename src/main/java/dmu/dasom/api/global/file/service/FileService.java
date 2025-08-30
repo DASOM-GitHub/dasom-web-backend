@@ -3,6 +3,7 @@ package dmu.dasom.api.global.file.service;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
 import dmu.dasom.api.domain.news.entity.NewsEntity;
+import dmu.dasom.api.global.R2.service.R2Service;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
 import dmu.dasom.api.global.file.entity.FileEntity;
 import dmu.dasom.api.global.file.enums.FileType;
@@ -10,10 +11,9 @@ import dmu.dasom.api.global.file.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,21 +23,27 @@ import java.util.stream.Collectors;
 public class FileService {
 
     private final FileRepository fileRepository;
+    private final R2Service r2Service;
 
     // 파일 업로드
-    public void uploadFiles(List<MultipartFile> files, FileType fileType, Long targetId) {
+    @Transactional
+    public List<FileResponseDto> uploadFiles(List<MultipartFile> files, FileType fileType, Long targetId) {
         List<FileEntity> filesToEntity = files.stream()
-            .map(file -> FileEntity.builder()
-                .originalName(file.getOriginalFilename())
-                .encodedData(encode(file))
-                .fileFormat(file.getContentType())
-                .fileSize(file.getSize())
-                .fileType(fileType)
-                .targetId(targetId)
-                .build())
-            .toList();
-
-        fileRepository.saveAllAndFlush(filesToEntity);
+            .map(file -> {
+                String fileUrl = r2Service.uploadFile(file);
+                return FileEntity.builder()
+                        .originalName(file.getOriginalFilename())
+                        .fileUrl(fileUrl)
+                        .fileFormat(file.getContentType())
+                        .fileSize(file.getSize())
+                        .fileType(fileType)
+                        .targetId(targetId)
+                        .build();
+                    }).toList();
+        List<FileEntity> savedFiles = fileRepository.saveAll(filesToEntity);
+        return savedFiles.stream()
+                .map(FileEntity::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     // 단일 파일 조회
@@ -56,13 +62,17 @@ public class FileService {
             .toList();
     }
 
+    @Transactional
     public void deleteFilesByTypeAndTargetId(FileType fileType, Long targetId) {
         List<FileEntity> files = findByFileTypeAndTargetId(fileType, targetId);
 
-        if (ObjectUtils.isNotEmpty(files))
-            fileRepository.deleteAll(files);
+        if (ObjectUtils.isNotEmpty(files)) {
+            files.forEach(file -> r2Service.deleteFile(file.getFileUrl()));
+        }
+        fileRepository.deleteAll(files);
     }
 
+    @Transactional
     public void deleteFilesById(NewsEntity news, List<Long> fileIds) {
         List<FileEntity> files = fileRepository.findAllById(fileIds);
 
@@ -92,15 +102,4 @@ public class FileService {
     private List<FileEntity> findByFileTypeAndTargetId(FileType fileType, Long targetId) {
         return fileRepository.findByFileTypeAndTargetId(fileType, targetId);
     }
-
-    private String encode(MultipartFile file) {
-        try {
-            byte[] bytes = file.getBytes();
-            return Base64.getEncoder()
-                .encodeToString(bytes);
-        } catch (IOException e) {
-            throw new CustomException(ErrorCode.FILE_ENCODE_FAIL);
-        }
-    }
-
 }

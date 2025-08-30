@@ -33,7 +33,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class RecruitServiceTest {
@@ -100,6 +99,36 @@ class RecruitServiceTest {
 
         // then
         assertEquals(ErrorCode.INVALID_TIME_FORMAT, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("모집 기수 수정")
+    void modifyGeneration_success() {
+        // given
+        Recruit generationRecruit = mock(Recruit.class);
+        String newGeneration = "35기";
+        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
+
+        // when
+        recruitService.modifyGeneration(newGeneration);
+
+        // then
+        verify(generationRecruit, times(1)).updateGeneration(newGeneration);
+    }
+
+    @Test
+    @DisplayName("기수 조회")
+    void getCurrentGeneration_success() {
+        // given
+        Recruit generationRecruit = mock(Recruit.class);
+        when(recruitRepository.findByKey(ConfigKey.GENERATION)).thenReturn(Optional.of(generationRecruit));
+        when(generationRecruit.getValue()).thenReturn("34기");
+        // when
+        String currentGeneration = recruitService.getCurrentGeneration();
+        // then
+        assertEquals("34기", currentGeneration);
+        verify(recruitRepository, times(1)).findByKey(ConfigKey.GENERATION);
+        verify(generationRecruit, times(1)).getValue();
     }
 
     @Test
@@ -195,5 +224,6 @@ class RecruitServiceTest {
         // then
         assertEquals(ErrorCode.ALREADY_RESERVED, exception.getErrorCode());
     }
+
 
 }

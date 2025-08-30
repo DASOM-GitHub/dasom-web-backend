@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,14 +41,14 @@ public class AdminFileController {
             ))
     })
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> uploadFiles(
+    public ResponseEntity<List<FileResponseDto>> uploadFiles(
         @RequestParam("files") List<MultipartFile> files,
         @RequestParam("fileType") FileType fileType,
         @RequestParam("targetId") @Min(1) Long targetId
     ) {
-        fileService.uploadFiles(files, fileType, targetId);
-        return ResponseEntity.ok()
-            .build();
+        List<FileResponseDto> fileResponseDtos = fileService.uploadFiles(files, fileType, targetId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(fileResponseDtos);
     }
 
     @ApiResponses(value = {

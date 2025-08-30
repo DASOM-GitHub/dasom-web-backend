@@ -1,6 +1,9 @@
 package dmu.dasom.api.domain.member.service;
 
 import dmu.dasom.api.domain.member.dto.LoginRequestDto;
+import dmu.dasom.api.domain.common.exception.CustomException;
+import dmu.dasom.api.domain.common.exception.ErrorCode;
+import dmu.dasom.api.domain.recruit.service.RecruitService;
 import dmu.dasom.api.domain.member.dto.SignupRequestDto;
 import dmu.dasom.api.domain.member.entity.Member;
 import dmu.dasom.api.domain.member.enums.Role;
@@ -26,6 +29,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final BCryptPasswordEncoder encoder;
     private final MemberRepository memberRepository;
+    private final RecruitService recruitService;
     private final JwtUtil jwtUtil;
 
     // 이메일로 사용자 조회
@@ -47,9 +51,13 @@ public class MemberServiceImpl implements MemberService {
         // 이미 가입된 이메일인지 확인
         if (checkByEmail(request.getEmail()))
             throw new CustomException(ErrorCode.SIGNUP_FAILED);
+        //기수는 선택적으로 가져오며, 없을 경우 신입 부붠 처리하여, 모집일정의 기수 사용
+        String generation = (request.getGeneration() != null && !request.getGeneration().isEmpty())
+                ? request.getGeneration()
+                : recruitService.getCurrentGeneration();
 
-        // 비밀번호 암호화 후 저장
-        memberRepository.save(request.toEntity(encoder.encode(request.getPassword())));
+        // 비밀번호 암호화 후 저장, 기수도 같이 기입
+        memberRepository.save(request.toEntity(encoder.encode(request.getPassword()), generation));
     }
 
     // 로그인 (기존 로직을 private 헬퍼 메소드로 변경)

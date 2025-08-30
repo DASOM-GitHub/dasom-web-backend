@@ -1,0 +1,20 @@
+services:
+  redis:
+    container_name: dasom-web-redis
+    image: redis:7.2.4
+    ports:
+      - "6400:6379"
+  oracledb:
+    image: gvenzl/oracle-free:23.5-faststart
+    container_name: oracle19c
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      - ORACLE_PDB=orcl
+      - ORACLE_PASSWORD=DevUser2025
+      - INIT_SGA_SIZE=1500
+      - INIT_PGA_SIZE=500
+    shm_size: "1g"
+    volumes:
+      - ./init-user.sql:/opt/oracle/scripts/setup/init-user.sql

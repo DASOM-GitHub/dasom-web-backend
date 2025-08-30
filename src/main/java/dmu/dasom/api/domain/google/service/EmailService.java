@@ -44,9 +44,8 @@ public class EmailService {
 
             // HTML 템플릿에 전달할 데이터 설정
             Context context = new Context();
-            context.setVariable("name", name); // 지원자 이름 전달
-            context.setVariable("buttonUrl", buttonUrl); // 버튼 링크 전달
-
+            context.setVariable("name", name);
+            context.setVariable("buttonUrl", buttonUrl);
 
             // HTML 템플릿 처리
             String htmlBody = templateEngine.process(mailTemplate.getTemplateName(), context);
@@ -60,11 +59,10 @@ public class EmailService {
             helper.setText(htmlBody, true);
             helper.setFrom((from != null && !from.isEmpty()) ? from : "dasomdmu@gmail.com");
 
-            // Content-Type을 명시적으로 설정
             message.setContent(htmlBody, "text/html; charset=utf-8");
 
             javaMailSender.send(message);
-            log.info("Email sent successfull {}", to);
+            log.info("Email sent successfully {}", to);
         } catch (MessagingException e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
             mailSendStatus = MailSendStatus.FAILURE;
@@ -76,4 +74,35 @@ public class EmailService {
         }
         emailLogService.logEmailSending(to, mailSendStatus, errorMessage);
     }
+
+    /*
+     * 면접 예약 변경을 위한 인증코드 발송
+     * - VerificationCodeManager에서 생성된 코드를 이메일로 전송
+     * - verify-num-email.html 템플릿을 이용해 코드와 버튼 링크 포함
+     */
+    public void sendVerificationEmail(String to, String name, String code) throws MessagingException {
+        String subject = "DASOM 면접 시간 변경을 위한 이메일 인증 코드 안내";
+
+        // 인증 코드만 템플릿으로 전달
+        String emailContent = "인증 코드: <strong>" + code + "</strong>";
+
+        Context context = new Context();
+        context.setVariable("name", name);
+        context.setVariable("emailContent", emailContent);
+        context.setVariable("buttonUrl", "https://dmu-dasom.or.kr");
+        context.setVariable("buttonText", "인증 완료");
+
+        String htmlBody = templateEngine.process("verify-num-email", context);
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true);
+        helper.setFrom((from != null && !from.isEmpty()) ? from : "dasomdmu@gmail.com");
+
+        javaMailSender.send(message);
+    }
+
 }

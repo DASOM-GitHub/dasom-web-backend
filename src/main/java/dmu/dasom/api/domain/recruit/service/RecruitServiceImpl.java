@@ -25,13 +25,13 @@ public class RecruitServiceImpl implements RecruitService {
 
     private final RecruitRepository recruitRepository;
 
-    // 모집 일정 설정 조회
+    // 모집 설정 조회
     @Override
     public List<RecruitConfigResponseDto> getRecruitSchedule() {
         return findAll().stream()
-            .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
-                ? config.toTimeResponse() : config.toResponse())
-            .toList();
+                .map(config -> config.getKey() == ConfigKey.INTERVIEW_TIME_START || config.getKey() == ConfigKey.INTERVIEW_TIME_END
+                        ? config.toTimeResponse() : config.toResponse())
+                .toList();
     }
 
     // 모집 일정 설정 수정
@@ -50,6 +50,20 @@ public class RecruitServiceImpl implements RecruitService {
         config.updateDateTime(dateTime);
     }
 
+
+    //기수 수정
+    @Override
+    @Transactional
+    public void modifyGeneration(String newGeneration) {
+        final Recruit config = findByKey(ConfigKey.GENERATION);
+        config.updateGeneration(newGeneration);
+    }
+    // 기수 조회
+    @Override
+    public String getCurrentGeneration() {
+        Recruit generationConfig = findByKey(ConfigKey.GENERATION);
+        return generationConfig.getValue();
+    }
     // 모집 기간 여부 확인
     @Override
     public boolean isRecruitmentActive() {
@@ -74,6 +88,30 @@ public class RecruitServiceImpl implements RecruitService {
         return parseDateTimeFormat(recruit.getValue());
     }
 
+    /*
+     * 모집 일정 초기화
+     * - DB에 Recruit 데이터가 존재하지 않을 경우 기본 값으로 초기화
+     * - 각 ConfigKey에 대해 Recruit 엔티티를 생성하여 저장
+     * - 기본 값은 "2025-01-01T00:00:00"으로 설정됨
+     */
+    @Override
+    @Transactional
+    public void initRecruitSchedule() {
+        // 이미 데이터가 존재하면 초기화하지 않음
+        if (recruitRepository.count() > 0) {
+            return;
+        }
+
+        // 모든 ConfigKey를 순회하며 기본 Recruit 데이터 생성
+        for (ConfigKey key : ConfigKey.values()) {
+            Recruit recruit = Recruit.builder()
+                    .key(key)
+                    .value("2025-01-01T00:00:00") // 초기 기본 값
+                    .build();
+            recruitRepository.save(recruit);
+        }
+    }
+
     // DB에 저장된 모든 Recruit 객체를 찾아 반환
     private List<Recruit> findAll() {
         return recruitRepository.findAll();
@@ -82,8 +120,7 @@ public class RecruitServiceImpl implements RecruitService {
     // DB에서 key에 해당하는 Recruit 객체를 찾아 반환
     private Recruit findByKey(final ConfigKey key) {
         return recruitRepository.findByKey(key)
-            .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
-
+                .orElseThrow(() -> new CustomException(ErrorCode.ARGUMENT_NOT_VALID));
     }
 
     // 시간 형식 변환 및 검증
@@ -103,5 +140,4 @@ public class RecruitServiceImpl implements RecruitService {
             throw new CustomException(ErrorCode.INVALID_DATETIME_FORMAT);
         }
     }
-
 }

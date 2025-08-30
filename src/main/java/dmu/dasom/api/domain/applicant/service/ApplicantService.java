@@ -4,7 +4,7 @@ import dmu.dasom.api.domain.applicant.dto.ApplicantCreateRequestDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantDetailsResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantResponseDto;
 import dmu.dasom.api.domain.applicant.dto.ApplicantStatusUpdateRequestDto;
-import dmu.dasom.api.domain.email.enums.MailType;
+import dmu.dasom.api.domain.google.enums.MailType;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
 import dmu.dasom.api.global.dto.PageResponse;

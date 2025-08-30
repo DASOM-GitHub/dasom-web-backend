@@ -9,8 +9,8 @@ import dmu.dasom.api.domain.applicant.enums.ApplicantStatus;
 import dmu.dasom.api.domain.applicant.repository.ApplicantRepository;
 import dmu.dasom.api.domain.common.exception.CustomException;
 import dmu.dasom.api.domain.common.exception.ErrorCode;
-import dmu.dasom.api.domain.email.enums.MailType;
-import dmu.dasom.api.domain.email.service.EmailService;
+import dmu.dasom.api.domain.google.enums.MailType;
+import dmu.dasom.api.domain.google.service.EmailService;
 import dmu.dasom.api.domain.google.service.GoogleApiService;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckRequestDto;
 import dmu.dasom.api.domain.recruit.dto.ResultCheckResponseDto;
@@ -132,11 +132,7 @@ public class ApplicantServiceImpl implements ApplicantService {
         }
 
         for (Applicant applicant : applicants) {
-            try {
-                emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
-            } catch (MessagingException e) {
-                System.err.println("Failed to send email to: " + applicant.getEmail());
-            }
+            emailService.sendEmail(applicant.getEmail(), applicant.getName(), mailType);
         }
     }
 

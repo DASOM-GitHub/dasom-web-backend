@@ -1,4 +1,4 @@
-package dmu.dasom.api.global.file.controller;
+package dmu.dasom.api.global.admin.controller;
 
 import dmu.dasom.api.domain.common.exception.ErrorResponse;
 import dmu.dasom.api.global.file.dto.FileResponseDto;
@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/api/admin/files")
 @RequiredArgsConstructor
-public class FileController {
+@Tag(name = "ADMIN - File API", description = "어드민 파일 관리 API")
+public class AdminFileController {
 
     private final FileService fileService;
 
@@ -38,14 +41,14 @@ public class FileController {
             ))
     })
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<Void> uploadFiles(
+    public ResponseEntity<List<FileResponseDto>> uploadFiles(
         @RequestParam("files") List<MultipartFile> files,
         @RequestParam("fileType") FileType fileType,
         @RequestParam("targetId") @Min(1) Long targetId
     ) {
-        fileService.uploadFiles(files, fileType, targetId);
-        return ResponseEntity.ok()
-            .build();
+        List<FileResponseDto> fileResponseDtos = fileService.uploadFiles(files, fileType, targetId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(fileResponseDtos);
     }
 
     @ApiResponses(value = {

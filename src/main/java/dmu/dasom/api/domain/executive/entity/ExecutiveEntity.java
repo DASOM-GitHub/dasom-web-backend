@@ -58,6 +58,15 @@ public class ExecutiveEntity extends BaseEntity {
         if (dto.getSortOrder() != null) this.sortOrder = dto.getSortOrder();
     }
 
+    @PrePersist
+    public void prePersist() {
+        if (sortOrder == null) sortOrder = 9999;
+    }
+    @PreUpdate
+    public void preUpdate() {
+        if (sortOrder == null) sortOrder = 9999;
+    }
+
     // 엔티티 -> DTO 변환 책임
     public ExecutiveResponseDto toResponseDto() {
         return ExecutiveResponseDto.builder()

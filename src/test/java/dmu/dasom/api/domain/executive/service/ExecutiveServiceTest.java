@@ -88,7 +88,6 @@ class ExecutiveServiceTest {
         // given
         Long id = 1L;
         ExecutiveRequestDto dto = new ExecutiveRequestDto(
-                id,
                 "김다솜",
                 "회장",
                 "동아리 운영 총괄",

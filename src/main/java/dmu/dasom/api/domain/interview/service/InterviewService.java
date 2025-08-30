@@ -2,6 +2,7 @@ package dmu.dasom.api.domain.interview.service;
 
 import dmu.dasom.api.domain.interview.dto.InterviewReservationApplicantResponseDto;
 import dmu.dasom.api.domain.interview.dto.InterviewReservationRequestDto;
+import dmu.dasom.api.domain.interview.dto.InterviewReservationModifyRequestDto;
 import dmu.dasom.api.domain.interview.dto.InterviewSlotResponseDto;
 
 import java.time.LocalDate;
@@ -26,5 +27,8 @@ public interface InterviewService {
     List<InterviewSlotResponseDto> getAllInterviewSlots();
 
     List<InterviewReservationApplicantResponseDto> getAllInterviewApplicants();
+
+    // 면접 예약 수정
+    void modifyInterviewReservation(InterviewReservationModifyRequestDto request);
 
 }

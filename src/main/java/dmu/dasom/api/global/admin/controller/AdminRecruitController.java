@@ -57,6 +57,19 @@ public class AdminRecruitController {
             .build();
     }
 
+    @Operation(summary = "모집 기수 변경")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "모집 기수 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
+    @PatchMapping("/generation")
+    public ResponseEntity<Void> modifyGeneration(@Valid @RequestBody String request) {
+        recruitService.modifyGeneration(request);
+        return ResponseEntity.ok()
+                .build();
+    }
+
+
     @Operation(summary = "면접 일정 생성", description = "새로운 면접 일정을 생성합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "면접 일정 생성 성공"),

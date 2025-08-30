@@ -37,7 +37,19 @@ public class Recruit {
         this.value = time.format(TIME_FORMATTER);
     }
 
+
+    // 기수 업데이트
+    public void updateGeneration(final String generation) {
+        this.value = generation; // ex. "34기"
+    }
+
     public RecruitConfigResponseDto toResponse() {
+        if(this.key == ConfigKey.GENERATION){
+            return RecruitConfigResponseDto.builder()
+                    .key(key)
+                    .value(value)
+                    .build();
+        }
         LocalDateTime dateTime = LocalDateTime.parse(this.value, DATE_TIME_FORMATTER);
         return RecruitConfigResponseDto.builder()
             .key(key)

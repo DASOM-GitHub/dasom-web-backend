@@ -33,4 +33,7 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_MEMBER;
 
+    // 기수 정보를 저장할 필드 추가
+    @Column(name = "generation", length = 4, nullable = false)
+    private String generation;
 }

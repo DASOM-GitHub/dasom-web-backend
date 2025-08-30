@@ -17,6 +17,10 @@ public interface RecruitService {
 
     void initRecruitSchedule();
 
+    void modifyGeneration(String newGeneration);
+
+    String getCurrentGeneration();
+
     String generateReservationCode(String studentNo, String contactLastDigits);
 
     LocalDateTime getResultAnnouncementSchedule(ResultCheckType type);

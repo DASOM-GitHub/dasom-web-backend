@@ -21,8 +21,8 @@ public class FileEntity {
     private String originalName;
 
     @Lob
-    @Column(name = "ENCODED_DATA", nullable = false, columnDefinition = "CLOB")
-    private String encodedData;
+    @Column(name = "FILE_URL", nullable = false, columnDefinition = "CLOB")
+    private String fileUrl;
 
     @Column(name = "FILE_FORMAT", nullable = false)
     private String fileFormat;
@@ -41,7 +41,7 @@ public class FileEntity {
         return FileResponseDto.builder()
             .id(id)
             .fileFormat(fileFormat)
-            .encodedData(encodedData)
+            .encodedData(fileUrl)
             .build();
     }
 

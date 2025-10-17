@@ -29,6 +29,8 @@ public class SomParticipantService {
                 .grade(requestDto.getGrade())
                 .contact(requestDto.getContact())
                 .email(requestDto.getEmail())
+                .githubLink(requestDto.getGithubLink())
+                .portfolioLink(requestDto.getPortfolioLink())
                 .build();
 
         SomParticipant saved = somParticipantRepository.save(participant);
@@ -83,6 +85,8 @@ public class SomParticipantService {
                 .grade(participant.getGrade())
                 .contact(participant.getContact())
                 .email(participant.getEmail())
+                .githubLink(participant.getGithubLink())
+                .portfolioLink(participant.getPortfolioLink())
                 .build();
     }
 

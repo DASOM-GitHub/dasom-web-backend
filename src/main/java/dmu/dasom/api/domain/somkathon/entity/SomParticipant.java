@@ -39,6 +39,12 @@ public class SomParticipant extends BaseEntity {
     @Column(nullable = false)
     private String email; // 이메일
 
+    @Column(nullable = false)
+    private String githubLink; // 깃허브 링크
+
+    @Column(nullable = false)
+    private String portfolioLink; // 포트폴리오 링크
+
     public void update(SomParticipantRequestDto requestDto) {
         this.participantName = requestDto.getParticipantName();
         this.studentId = requestDto.getStudentId();
@@ -46,5 +52,7 @@ public class SomParticipant extends BaseEntity {
         this.grade = requestDto.getGrade();
         this.contact = requestDto.getContact();
         this.email = requestDto.getEmail();
+        this.githubLink = requestDto.getGithubLink();
+        this.portfolioLink = requestDto.getPortfolioLink();
     }
 }

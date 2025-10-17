@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 @Getter
 @Setter
@@ -41,4 +42,14 @@ public class SomParticipantRequestDto {
     @Email(message = "올바른 이메일 형식이 아닙니다.")
     @Schema(description = "이메일 주소", example = "hong@example.com", required = true)
     private String email; // 이메일
+
+    @NotBlank(message = "GitHub 주소는 필수 입력 값입니다.")
+    @URL(protocol = "https", host = "github.com", message = "GitHub URL이 올바르지 않습니다.")
+    @Schema(description = "GitHub 주소", example = "https://github.com/username", required = true)
+    private String githubLink; // 깃허브 주소
+
+    @NotBlank(message = "포트폴리오 주소는 필수 입력 값입니다.")
+    @URL(protocol = "https", message = "포트폴리오 URL이 올바르지 않습니다.")
+    @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
+    private String portfolioLink; // 포트폴리오 주소
 }

@@ -43,7 +43,6 @@ public class SomParticipantRequestDto {
     @Schema(description = "이메일 주소", example = "hong@example.com", required = true)
     private String email; // 이메일
 
-    @NotBlank(message = "GitHub 주소는 필수 입력 값입니다.")
     @URL(protocol = "https", host = "github.com", message = "GitHub URL이 올바르지 않습니다.")
     @Schema(description = "GitHub 주소", example = "https://github.com/username", required = true)
     private String githubLink; // 깃허브 주소

@@ -39,7 +39,7 @@ public class SomParticipant extends BaseEntity {
     @Column(nullable = false)
     private String email; // 이메일
 
-    @Column(nullable = false)
+    @Column
     private String githubLink; // 깃허브 링크
 
     @Column(nullable = false)

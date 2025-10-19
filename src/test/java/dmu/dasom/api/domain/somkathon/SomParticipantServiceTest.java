@@ -35,15 +35,16 @@ class SomParticipantServiceTest {
     @Test
     @DisplayName("참가자 생성 - 성공")
     void createParticipant_success() {
-        SomParticipantRequestDto request = new SomParticipantRequestDto();
-        request.setParticipantName("홍길동");
-        request.setStudentId("20250001");
-        request.setDepartment("컴퓨터공학과");
-        request.setGrade("3");
-        request.setContact("010-1234-5678");
-        request.setEmail("hong@example.com");
-        request.setGithubLink("https://github.com/username");
-        request.setPortfolioLink("https://drive.google.com/file");
+        SomParticipantRequestDto request = SomParticipantRequestDto.builder()
+                .participantName("홍길동")
+                .studentId("20250001")
+                .department("컴퓨터공학과")
+                .grade("3")
+                .contact("010-1234-5678")
+                .email("hong@example.com")
+                .githubLink("https://github.com/username")
+                .portfolioLink("https://drive.google.com/file")
+                .build();
 
         when(repository.findByStudentId("20250001")).thenReturn(Optional.empty());
         when(repository.save(any(SomParticipant.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -67,8 +68,9 @@ class SomParticipantServiceTest {
     @Test
     @DisplayName("참가자 생성 - 실패 (학생ID 중복)")
     void createParticipant_fail_duplicateStudentId() {
-        SomParticipantRequestDto request = new SomParticipantRequestDto();
-        request.setStudentId("20250001");
+        SomParticipantRequestDto request = SomParticipantRequestDto.builder()
+                .studentId("20250001")
+                .build();
 
         when(repository.findByStudentId("20250001")).thenReturn(Optional.of(mock(SomParticipant.class)));
 
@@ -111,10 +113,8 @@ class SomParticipantServiceTest {
         List<SomParticipantResponseDto> list = service.getAllParticipants();
 
         assertEquals(2, list.size());
-
         assertEquals("홍길동", list.get(0).getParticipantName());
         assertEquals("김철수", list.get(1).getParticipantName());
-
         assertEquals("https://github.com/hong", list.get(0).getGithubLink());
         assertEquals("https://notion.site", list.get(1).getPortfolioLink());
 
@@ -151,6 +151,65 @@ class SomParticipantServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
         CustomException exception = assertThrows(CustomException.class, () -> service.getParticipant(1L));
+        assertEquals(ErrorCode.NOT_FOUND_PARTICIPANT, exception.getErrorCode());
+
+        verify(repository, times(1)).findById(1L);
+    }
+
+    // =======================
+    // Put Tests
+    // =======================
+    @Test
+    @DisplayName("참가자 수정 - 성공")
+    void updateParticipant_success() {
+        SomParticipant existing = SomParticipant.builder()
+                .participantName("홍길동")
+                .studentId("20250001")
+                .department("컴퓨터공학과")
+                .grade("3")
+                .contact("010-1234-5678")
+                .email("hong@example.com")
+                .githubLink("https://github.com/username")
+                .portfolioLink("https://drive.google.com/file")
+                .build();
+
+        SomParticipantRequestDto updateRequest = SomParticipantRequestDto.builder()
+                .participantName("홍길동2")
+                .studentId("20250001")
+                .department("소프트웨어공학과")
+                .grade("4")
+                .contact("010-1111-2222")
+                .email("hong2@example.com")
+                .githubLink("https://github.com/username2")
+                .portfolioLink("https://drive.google.com/file2")
+                .build();
+
+        when(repository.findById(1L)).thenReturn(Optional.of(existing));
+
+        SomParticipantResponseDto response = service.updateParticipant(1L, updateRequest);
+
+        assertEquals("홍길동2", response.getParticipantName());
+        assertEquals("20250001", response.getStudentId());
+        assertEquals("소프트웨어공학과", response.getDepartment());
+        assertEquals("4", response.getGrade());
+        assertEquals("010-1111-2222", response.getContact());
+        assertEquals("hong2@example.com", response.getEmail());
+        assertEquals("https://github.com/username2", response.getGithubLink());
+        assertEquals("https://drive.google.com/file2", response.getPortfolioLink());
+
+        verify(repository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("참가자 수정 - 실패 (없음)")
+    void updateParticipant_fail_notFound() {
+        SomParticipantRequestDto updateRequest = SomParticipantRequestDto.builder()
+                .participantName("홍길동2")
+                .build();
+
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> service.updateParticipant(1L, updateRequest));
         assertEquals(ErrorCode.NOT_FOUND_PARTICIPANT, exception.getErrorCode());
 
         verify(repository, times(1)).findById(1L);

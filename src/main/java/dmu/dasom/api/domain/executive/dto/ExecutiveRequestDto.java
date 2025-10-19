@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Getter
@@ -14,8 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(name = "ExecutiveRequestDto", description = "임원진 요청 DTO")
 public class ExecutiveRequestDto {
-
-    private Long id;
 
     @NotBlank(message = "임원진 이름은 필수 입력 사항입니다.")
     @Size(max = 50, message = "임원진 이름은 최대 50자입니다.")
@@ -45,7 +44,7 @@ public class ExecutiveRequestDto {
                 .role(this.role)
                 .githubUsername(this.github_username)
                 .team(this.team)
-                .sortOrder(this.sortOrder)
+                .sortOrder(sortOrder != null ? sortOrder : 9999)
                 .build();
     }
 }

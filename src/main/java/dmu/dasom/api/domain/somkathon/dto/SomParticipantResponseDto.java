@@ -31,4 +31,10 @@ public class SomParticipantResponseDto {
 
     @Schema(description = "이메일 주소", example = "hong@example.com", required = true)
     private String email;           // 이메일
+
+    @Schema(description = "깃허브 주소", example = "https://github.com/username", required = true)
+    private String githubLink; // 깃허브 주소
+
+    @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
+    private String portfolioLink; // 포트폴리오 주소
 }

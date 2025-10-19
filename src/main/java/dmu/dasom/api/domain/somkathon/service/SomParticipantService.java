@@ -29,11 +29,13 @@ public class SomParticipantService {
                 .grade(requestDto.getGrade())
                 .contact(requestDto.getContact())
                 .email(requestDto.getEmail())
+                .githubLink(requestDto.getGithubLink())
+                .portfolioLink(requestDto.getPortfolioLink())
                 .build();
 
         SomParticipant saved = somParticipantRepository.save(participant);
 
-        return toResponseDto(saved);
+        return saved.toResponseDto(saved);
     }
 
     /**
@@ -41,7 +43,7 @@ public class SomParticipantService {
      */
     public List<SomParticipantResponseDto> getAllParticipants() {
         return somParticipantRepository.findAll().stream()
-                .map(this::toResponseDto)
+                .map(p -> p.toResponseDto(p))
                 .collect(Collectors.toList());
     }
 
@@ -51,15 +53,18 @@ public class SomParticipantService {
     public SomParticipantResponseDto getParticipant(Long id){
         SomParticipant participant = findParticipantById(id);
 
-        return toResponseDto(participant);
+        return participant.toResponseDto(participant);
     }
 
+    /**
+     * 참가자 수정 (Put)
+     */
     public SomParticipantResponseDto updateParticipant(Long id, SomParticipantRequestDto requestDto){
         SomParticipant participant = findParticipantById(id);
 
         participant.update(requestDto);
 
-        return toResponseDto(participant);
+        return participant.toResponseDto(participant);
     }
 
     /**
@@ -68,22 +73,6 @@ public class SomParticipantService {
     public void deleteParticipant(Long id) {
         findParticipantById(id);
         somParticipantRepository.deleteById(id);
-    }
-
-
-    /**
-     * Entity → Response DTO 변환 메서드
-     */
-    private SomParticipantResponseDto toResponseDto(SomParticipant participant) {
-        return SomParticipantResponseDto.builder()
-                .id(participant.getId())
-                .participantName(participant.getParticipantName())
-                .studentId(participant.getStudentId())
-                .department(participant.getDepartment())
-                .grade(participant.getGrade())
-                .contact(participant.getContact())
-                .email(participant.getEmail())
-                .build();
     }
 
     /**

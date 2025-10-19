@@ -42,3 +42,7 @@ out/
 ### dev ###
 application-dev.yml
 
+# local/dev only
+.dev/
+docker-compose.yml
+init-user.sql

@@ -2,6 +2,7 @@ package dmu.dasom.api.domain.somkathon.entity;
 
 import dmu.dasom.api.domain.common.BaseEntity;
 import dmu.dasom.api.domain.somkathon.dto.SomParticipantRequestDto;
+import dmu.dasom.api.domain.somkathon.dto.SomParticipantResponseDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,12 @@ public class SomParticipant extends BaseEntity {
     @Column(nullable = false)
     private String email; // 이메일
 
+    @Column
+    private String githubLink; // 깃허브 링크
+
+    @Column(nullable = false)
+    private String portfolioLink; // 포트폴리오 링크
+
     public void update(SomParticipantRequestDto requestDto) {
         this.participantName = requestDto.getParticipantName();
         this.studentId = requestDto.getStudentId();
@@ -46,5 +53,24 @@ public class SomParticipant extends BaseEntity {
         this.grade = requestDto.getGrade();
         this.contact = requestDto.getContact();
         this.email = requestDto.getEmail();
+        this.githubLink = requestDto.getGithubLink();
+        this.portfolioLink = requestDto.getPortfolioLink();
+    }
+
+    /**
+     * Entity → Response DTO 변환 메서드
+     */
+    public SomParticipantResponseDto toResponseDto(SomParticipant participant) {
+        return SomParticipantResponseDto.builder()
+                .id(participant.getId())
+                .participantName(participant.getParticipantName())
+                .studentId(participant.getStudentId())
+                .department(participant.getDepartment())
+                .grade(participant.getGrade())
+                .contact(participant.getContact())
+                .email(participant.getEmail())
+                .githubLink(participant.getGithubLink())
+                .portfolioLink(participant.getPortfolioLink())
+                .build();
     }
 }

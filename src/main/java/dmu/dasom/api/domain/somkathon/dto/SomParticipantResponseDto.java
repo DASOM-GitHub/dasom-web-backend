@@ -3,10 +3,8 @@ package dmu.dasom.api.domain.somkathon.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
 @Schema(description = "솜커톤 참가자 응답 DTO")
 public class SomParticipantResponseDto {
@@ -37,4 +35,10 @@ public class SomParticipantResponseDto {
 
     @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
     private String portfolioLink; // 포트폴리오 주소
+
+    @Schema(description = "컴퓨터공학부 내 전과 여부 (true: 컴퓨터공학부 내에서 전과함, false: 다른 학부에서 전과함, null: 전과 안 함)", example = "null")
+    private Boolean isTransferredInCS; // 컴퓨터공학부 내 전과 여부
+
+    @Schema(description = "학생회비 납부 여부 (true: 납부, false: 미납, null: 선택 안 함)", example = "null")
+    private Boolean isPaid; // 학생회비 납부 여부
 }

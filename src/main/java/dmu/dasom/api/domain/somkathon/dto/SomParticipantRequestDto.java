@@ -54,4 +54,10 @@ public class SomParticipantRequestDto {
     @URL(protocol = "https", message = "포트폴리오 URL이 올바르지 않습니다.")
     @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
     private final String portfolioLink; // 포트폴리오 주소
+
+    @Schema(description = "컴퓨터공학부 내 전과 여부 (true: 컴퓨터공학부 내에서 전과함, false: 다른 학부에서 전과함, null: 전과 안 함)", example = "null")
+    private final Boolean isTransferredInCS;
+
+    @Schema(description = "학생회비 납부 여부 (true: 납부, false: 미납, null: 선택 안 함)", example = "null")
+    private final Boolean isPaid;
 }

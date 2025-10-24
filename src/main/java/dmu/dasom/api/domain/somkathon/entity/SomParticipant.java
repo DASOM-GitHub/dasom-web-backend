@@ -46,6 +46,12 @@ public class SomParticipant extends BaseEntity {
     @Column(nullable = false)
     private String portfolioLink; // 포트폴리오 링크
 
+    @Column
+    private Boolean isTransferredInCS; // 컴퓨터공학부 내 전과 여부
+
+    @Column
+    private Boolean isPaid; // 학생회비 납부 여부
+
     public void update(SomParticipantRequestDto requestDto) {
         this.participantName = requestDto.getParticipantName();
         this.studentId = requestDto.getStudentId();
@@ -55,22 +61,26 @@ public class SomParticipant extends BaseEntity {
         this.email = requestDto.getEmail();
         this.githubLink = requestDto.getGithubLink();
         this.portfolioLink = requestDto.getPortfolioLink();
+        this.isTransferredInCS = requestDto.getIsTransferredInCS();
+        this.isPaid = requestDto.getIsPaid();
     }
 
     /**
      * Entity → Response DTO 변환 메서드
      */
-    public SomParticipantResponseDto toResponseDto(SomParticipant participant) {
+    public SomParticipantResponseDto toResponseDto() {
         return SomParticipantResponseDto.builder()
-                .id(participant.getId())
-                .participantName(participant.getParticipantName())
-                .studentId(participant.getStudentId())
-                .department(participant.getDepartment())
-                .grade(participant.getGrade())
-                .contact(participant.getContact())
-                .email(participant.getEmail())
-                .githubLink(participant.getGithubLink())
-                .portfolioLink(participant.getPortfolioLink())
+                .id(this.getId())
+                .participantName(this.getParticipantName())
+                .studentId(this.getStudentId())
+                .department(this.getDepartment())
+                .grade(this.getGrade())
+                .contact(this.getContact())
+                .email(this.getEmail())
+                .githubLink(this.getGithubLink())
+                .portfolioLink(this.getPortfolioLink())
+                .isTransferredInCS(this.getIsTransferredInCS())
+                .isPaid(this.getIsPaid())
                 .build();
     }
 }

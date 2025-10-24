@@ -44,6 +44,8 @@ class SomParticipantServiceTest {
                 .email("hong@example.com")
                 .githubLink("https://github.com/username")
                 .portfolioLink("https://drive.google.com/file")
+                .isTransferredInCS(null)  // null 테스트
+                .isPaid(true)             // true 테스트
                 .build();
 
         when(repository.findByStudentId("20250001")).thenReturn(Optional.empty());
@@ -60,6 +62,8 @@ class SomParticipantServiceTest {
         assertEquals("hong@example.com", response.getEmail());
         assertEquals("https://github.com/username", response.getGithubLink());
         assertEquals("https://drive.google.com/file", response.getPortfolioLink());
+        assertNull(response.getIsTransferredInCS());
+        assertTrue(response.getIsPaid());
 
         verify(repository, times(1)).findByStudentId("20250001");
         verify(repository, times(1)).save(any(SomParticipant.class));
@@ -96,6 +100,8 @@ class SomParticipantServiceTest {
                 .email("hong@example.com")
                 .githubLink("https://github.com/hong")
                 .portfolioLink("https://drive.google.com/file")
+                .isTransferredInCS(null)
+                .isPaid(true)
                 .build();
         SomParticipant p2 = SomParticipant.builder()
                 .participantName("김철수")
@@ -106,6 +112,8 @@ class SomParticipantServiceTest {
                 .email("kim@example.com")
                 .githubLink("https://github.com/kim")
                 .portfolioLink("https://notion.site")
+                .isTransferredInCS(false)
+                .isPaid(false)
                 .build();
 
         when(repository.findAll()).thenReturn(List.of(p1, p2));
@@ -117,6 +125,10 @@ class SomParticipantServiceTest {
         assertEquals("김철수", list.get(1).getParticipantName());
         assertEquals("https://github.com/hong", list.get(0).getGithubLink());
         assertEquals("https://notion.site", list.get(1).getPortfolioLink());
+        assertNull(list.get(0).getIsTransferredInCS());
+        assertTrue(list.get(0).getIsPaid());
+        assertFalse(list.get(1).getIsPaid());
+        assertFalse(list.get(1).getIsTransferredInCS());
 
         verify(repository, times(1)).findAll();
     }
@@ -133,6 +145,8 @@ class SomParticipantServiceTest {
                 .email("hong@example.com")
                 .githubLink("https://github.com/username")
                 .portfolioLink("https://drive.google.com/file")
+                .isTransferredInCS(true)
+                .isPaid(false)
                 .build();
 
         when(repository.findById(1L)).thenReturn(Optional.of(participant));
@@ -141,6 +155,8 @@ class SomParticipantServiceTest {
 
         assertEquals("홍길동", response.getParticipantName());
         assertEquals("20250001", response.getStudentId());
+        assertTrue(response.getIsTransferredInCS());
+        assertFalse(response.getIsPaid());
 
         verify(repository, times(1)).findById(1L);
     }
@@ -171,6 +187,8 @@ class SomParticipantServiceTest {
                 .email("hong@example.com")
                 .githubLink("https://github.com/username")
                 .portfolioLink("https://drive.google.com/file")
+                .isTransferredInCS(false)
+                .isPaid(false)
                 .build();
 
         SomParticipantRequestDto updateRequest = SomParticipantRequestDto.builder()
@@ -182,6 +200,8 @@ class SomParticipantServiceTest {
                 .email("hong2@example.com")
                 .githubLink("https://github.com/username2")
                 .portfolioLink("https://drive.google.com/file2")
+                .isTransferredInCS(true)
+                .isPaid(null)
                 .build();
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
@@ -196,6 +216,8 @@ class SomParticipantServiceTest {
         assertEquals("hong2@example.com", response.getEmail());
         assertEquals("https://github.com/username2", response.getGithubLink());
         assertEquals("https://drive.google.com/file2", response.getPortfolioLink());
+        assertTrue(response.getIsTransferredInCS());
+        assertNull(response.getIsPaid());
 
         verify(repository, times(1)).findById(1L);
     }

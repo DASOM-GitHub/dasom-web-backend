@@ -31,11 +31,13 @@ public class SomParticipantService {
                 .email(requestDto.getEmail())
                 .githubLink(requestDto.getGithubLink())
                 .portfolioLink(requestDto.getPortfolioLink())
+                .isTransferredInCS(requestDto.getIsTransferredInCS())
+                .isPaid(requestDto.getIsPaid())
                 .build();
 
         SomParticipant saved = somParticipantRepository.save(participant);
 
-        return saved.toResponseDto(saved);
+        return saved.toResponseDto();
     }
 
     /**
@@ -43,7 +45,7 @@ public class SomParticipantService {
      */
     public List<SomParticipantResponseDto> getAllParticipants() {
         return somParticipantRepository.findAll().stream()
-                .map(p -> p.toResponseDto(p))
+                .map(SomParticipant::toResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +55,7 @@ public class SomParticipantService {
     public SomParticipantResponseDto getParticipant(Long id){
         SomParticipant participant = findParticipantById(id);
 
-        return participant.toResponseDto(participant);
+        return participant.toResponseDto();
     }
 
     /**
@@ -64,7 +66,7 @@ public class SomParticipantService {
 
         participant.update(requestDto);
 
-        return participant.toResponseDto(participant);
+        return participant.toResponseDto();
     }
 
     /**

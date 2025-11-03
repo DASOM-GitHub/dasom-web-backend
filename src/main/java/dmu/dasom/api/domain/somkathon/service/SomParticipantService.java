@@ -31,6 +31,7 @@ public class SomParticipantService {
                 .email(requestDto.getEmail())
                 .githubLink(requestDto.getGithubLink())
                 .portfolioLink(requestDto.getPortfolioLink())
+                .positions(requestDto.getPositions())
                 .build();
 
         SomParticipant saved = somParticipantRepository.save(participant);

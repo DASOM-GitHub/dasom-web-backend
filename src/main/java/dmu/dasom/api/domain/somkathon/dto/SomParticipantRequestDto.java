@@ -1,5 +1,6 @@
 package dmu.dasom.api.domain.somkathon.dto;
 
+import dmu.dasom.api.domain.somkathon.entity.SomkathonPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.validator.constraints.URL;
+
 
 @Getter
 @Builder
@@ -54,4 +56,7 @@ public class SomParticipantRequestDto {
     @URL(protocol = "https", message = "포트폴리오 URL이 올바르지 않습니다.")
     @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
     private final String portfolioLink; // 포트폴리오 주소
+
+    @Schema(description = "지원 분야", example = "FRONTEND")
+    private final SomkathonPosition positions;
 }

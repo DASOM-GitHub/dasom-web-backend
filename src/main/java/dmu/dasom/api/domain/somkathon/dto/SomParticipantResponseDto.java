@@ -1,9 +1,12 @@
 package dmu.dasom.api.domain.somkathon.dto;
 
+import dmu.dasom.api.domain.somkathon.entity.SomkathonPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,4 +40,7 @@ public class SomParticipantResponseDto {
 
     @Schema(description = "포트폴리오 주소", example = "https://portfolio.com/username", required = true)
     private String portfolioLink; // 포트폴리오 주소
+
+    @Schema(description = "지원 분야", example = "FRONTEND")
+    private SomkathonPosition positions; // 지원 분야
 }

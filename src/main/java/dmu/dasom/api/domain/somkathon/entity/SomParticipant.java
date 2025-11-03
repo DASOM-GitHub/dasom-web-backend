@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+
 @AllArgsConstructor
 @Builder
 @Entity
@@ -46,6 +47,10 @@ public class SomParticipant extends BaseEntity {
     @Column(nullable = false)
     private String portfolioLink; // 포트폴리오 링크
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "position")
+    private SomkathonPosition positions;
+
     public void update(SomParticipantRequestDto requestDto) {
         this.participantName = requestDto.getParticipantName();
         this.studentId = requestDto.getStudentId();
@@ -55,6 +60,7 @@ public class SomParticipant extends BaseEntity {
         this.email = requestDto.getEmail();
         this.githubLink = requestDto.getGithubLink();
         this.portfolioLink = requestDto.getPortfolioLink();
+        this.positions = requestDto.getPositions();
     }
 
     /**
@@ -71,6 +77,7 @@ public class SomParticipant extends BaseEntity {
                 .email(participant.getEmail())
                 .githubLink(participant.getGithubLink())
                 .portfolioLink(participant.getPortfolioLink())
+                .positions(participant.getPositions())
                 .build();
     }
 }

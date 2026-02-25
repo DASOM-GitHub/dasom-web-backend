@@ -5,14 +5,20 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        Server prodServer = new Server();
+        prodServer.setUrl("https://dmu-dasom-api.or.kr");
+        prodServer.setDescription("DASOM API Production Server");
         SecurityScheme jwtAuthScheme = new SecurityScheme()
                 .name("Authorization")
                 .type(SecurityScheme.Type.HTTP)
@@ -22,6 +28,7 @@ public class SwaggerConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
         return new OpenAPI()
+                .servers(List.of(prodServer))
                 .info(new Info()
                         .title("DASOM web API")
                         .version("v1.0.0"))

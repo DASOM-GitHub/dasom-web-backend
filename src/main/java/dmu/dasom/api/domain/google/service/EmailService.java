@@ -40,7 +40,7 @@ public class EmailService {
 
             // 메일 템플릿 조회
             MailTemplate mailTemplate = MailTemplate.getMailType(mailType);
-            String buttonUrl = "https://dmu-dasom.or.kr/recruit/result";
+            String buttonUrl = "https://dmudasom.netlify.app/recruit/result";
 
             // HTML 템플릿에 전달할 데이터 설정
             Context context = new Context();

@@ -20,6 +20,7 @@ public class Section {
     @Column(length = 50, nullable = false, unique = true)
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Activity> activities = new ArrayList<>();
 
